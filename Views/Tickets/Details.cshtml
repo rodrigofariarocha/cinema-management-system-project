@@ -1,0 +1,172 @@
+@model CinemaRocha.Models.Movie
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<style>
+    .movie-detail-hero {
+        position: relative;
+        min-height: 500px;
+        background: linear-gradient(to bottom, transparent, var(--c-bg-main) 90%), 
+                    url('@Model.ImageUrl') center/cover;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        margin-bottom: 60px;
+    }
+    
+    .movie-detail-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255, 59, 48, 0.3), transparent);
+        backdrop-filter: blur(100px);
+    }
+    
+    .session-card {
+        background: var(--gradient-card);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .session-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--gradient-primary);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .session-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--c-primary);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .session-card:hover::before {
+        opacity: 1;
+    }
+    
+    .session-time {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+    }
+    
+    .session-date {
+        font-size: 0.95rem;
+        color: var(--c-text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .session-room {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: var(--c-text-secondary);
+        border: 1px solid var(--c-border);
+    }
+</style>
+
+<div class="container" style="margin-top: 60px; margin-bottom: 80px;">
+    <div class="row g-5">
+        <!-- Movie Poster -->
+        <div class="col-lg-4">
+            <div style="position: sticky; top: 100px;">
+                <div class="poster-wrapper" style="border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-lg);">
+                    <img src="@Model.ImageUrl" alt="@Model.Title" style="width: 100%; display: block;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Movie Info -->
+        <div class="col-lg-8">
+            <div style="animation: fadeInUp 0.6s ease-out;">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="movie-genre">@Model.Genre</span>
+                    <span class="age-badge age-12">M/12</span>
+                </div>
+                
+                <h1 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 1.5rem; line-height: 1.1;">@Model.Title</h1>
+                
+                <div class="d-flex align-items-center gap-4 mb-4">
+                    <div class="rating-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-half"></i>
+                        <span style="margin-left: 8px; color: var(--c-text-secondary); font-size: 0.95rem;">4.5</span>
+                    </div>
+                    <span class="text-muted" style="display: flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-clock"></i> @Model.Duration min
+                    </span>
+                </div>
+
+                <p class="lead" style="color: var(--c-text-secondary); line-height: 1.8; font-size: 1.15rem; margin-bottom: 3rem;">
+                    @Model.Description
+                </p>
+
+                <div style="border-top: 1px solid var(--c-border); padding-top: 3rem;">
+                    <h2 class="section-title" style="font-size: 2rem; margin-bottom: 2.5rem;">Sessões Disponíveis</h2>
+
+                    @if (Model.Sessions != null && Model.Sessions.Any())
+                    {
+                        <div class="row g-4">
+                            @foreach (var session in Model.Sessions.OrderBy(s => s.StartTime))
+                            {
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="session-card">
+                                        <div class="mb-3">
+                                            <div class="session-date mb-2">
+                                                <i class="bi bi-calendar3"></i> @session.StartTime.ToString("dd MMMM yyyy")
+                                            </div>
+                                            <div class="session-time">@session.StartTime.ToString("HH:mm")</div>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <span class="session-room">
+                                                <i class="bi bi-door-open"></i>
+                                                @session.Room?.Name
+                                            </span>
+                                        </div>
+                                        
+                                        <a asp-action="SelectSeats" asp-route-id="@session.Id" class="btn-primary w-100 d-flex align-items-center justify-content-center gap-2" style="padding: 14px;">
+                                            <i class="bi bi-ticket-perforated"></i>
+                                            Reservar Lugares
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5" style="background: rgba(255, 255, 255, 0.02); border-radius: var(--radius-lg); border: 1px dashed var(--c-border);">
+                            <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                            <p class="lead text-muted mt-3 mb-0">Não existem sessões disponíveis para este filme no momento.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,72 @@
+﻿@model IEnumerable<CinemaRocha.Models.Movie>
+
+@{
+    ViewData["Title"] = "Home";
+    var featuredMovie = Model.FirstOrDefault();
+}
+
+<!-- HERO SECTION -->
+@if (featuredMovie != null)
+{
+    <section class="hero" style="background-image: url('@featuredMovie.ImageUrl');">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <span class="tagline">EM DESTAQUE</span>
+            <h1 class="hero-title">@featuredMovie.Title</h1>
+            <p class="hero-desc">@featuredMovie.Description</p>
+            <div class="hero-actions">
+                <a asp-controller="Tickets" asp-action="Details" asp-route-id="@featuredMovie.Id" class="btn-primary">
+                    <i class="bi bi-ticket-perforated-fill"></i> Comprar Bilhetes
+                </a>
+                <a href="#" class="btn-outline">
+                    <i class="bi bi-play-circle"></i> Ver Trailer
+                </a>
+            </div>
+        </div>
+    </section>
+}
+else
+{
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Bem-vindo ao RochaCinema</h1>
+            <p class="hero-desc">A melhor experiência de cinema.</p>
+        </div>
+    </section>
+}
+
+<!-- MOVIES GRID -->
+<section id="now-showing" class="container">
+    <h2 class="section-title">Em Exibição</h2>
+    
+    <div class="movies-grid">
+        @foreach (var movie in Model)
+        {
+            <a asp-controller="Tickets" asp-action="Details" asp-route-id="@movie.Id" class="movie-card">
+                <div class="poster-wrapper">
+                    <img src="@movie.ImageUrl" alt="@movie.Title Poster">
+                </div>
+                <div class="card-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span class="movie-genre">@movie.Genre</span>
+                        <span class="age-badge age-12">M/12</span>
+                    </div>
+                    <h3 class="movie-title">@movie.Title</h3>
+                    <div class="rating-stars" style="margin-top: 8px;">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-half"></i>
+                        <span style="margin-left: 6px; color: var(--c-text-secondary); font-size: 0.85rem;">4.5</span>
+                    </div>
+                    <div class="movie-meta">
+                        <span><i class="bi bi-clock"></i> @movie.Duration min</span>
+                        <span><i class="bi bi-calendar3"></i> 2024</span>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+</section>

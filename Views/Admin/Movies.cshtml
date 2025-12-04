@@ -1,0 +1,61 @@
+@model IEnumerable<CinemaRocha.Models.Movie>
+
+@{
+    ViewData["Title"] = "Gestão de Filmes";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-header">
+    <div>
+        <h1 class="h2 fw-bold">Filmes</h1>
+        <p class="text-muted">Gerir catálogo de filmes</p>
+    </div>
+    <a asp-action="CreateMovie" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Novo Filme
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Filme</th>
+                        <th>Género</th>
+                        <th>Duração</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@item.ImageUrl" alt="" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;">
+                                    <div>
+                                        <div class="fw-bold">@item.Title</div>
+                                        <div class="small text-muted">ID: @item.Id</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-secondary">@item.Genre</span></td>
+                            <td>@item.Duration min</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-action="EditMovie" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="DeleteMovie" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

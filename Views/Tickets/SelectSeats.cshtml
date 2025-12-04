@@ -1,0 +1,129 @@
+@model CinemaRocha.Models.Session
+
+@{
+    ViewData["Title"] = "Select Seats";
+    var reservedSeatIds = Model.Reservations.SelectMany(r => r.Seats).Select(s => s.Id).ToList();
+}
+
+<div class="container" style="margin-top: 40px;">
+    <div class="text-center mb-5">
+        <h2 class="section-title justify-content-center">Selecionar Lugares</h2>
+        <p class="text-muted">@Model.Movie.Title - @Model.StartTime.ToString("dd MMM HH:mm") - @Model.Room.Name</p>
+    </div>
+
+    <div class="screen-container mb-5">
+        <div class="screen">ECRÃ</div>
+    </div>
+
+    <form asp-action="Book" method="post" id="bookingForm">
+        <input type="hidden" name="sessionId" value="@Model.Id" />
+        <input type="hidden" name="selectedSeats" id="selectedSeatsInput" />
+
+        <div class="seats-container d-flex flex-column align-items-center gap-2">
+            @foreach (var rowGroup in Model.Room.Seats.GroupBy(s => s.Row).OrderBy(g => g.Key))
+            {
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="text-muted me-2" style="width: 20px;">@rowGroup.Key</span>
+                    @foreach (var seat in rowGroup.OrderBy(s => s.Number))
+                    {
+                        var isReserved = reservedSeatIds.Contains(seat.Id);
+                        <div class="seat @(isReserved ? "occupied" : "")" 
+                             data-id="@seat.Id" 
+                             onclick="toggleSeat(this)"
+                             title="Row @seat.Row - Seat @seat.Number">
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="legend d-flex justify-content-center gap-4 mt-5">
+            <div class="d-flex align-items-center gap-2">
+                <div class="seat"></div> <span>Livre</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="seat selected"></div> <span>Selecionado</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="seat occupied"></div> <span>Ocupado</span>
+            </div>
+        </div>
+
+        <div class="booking-summary text-center mt-5">
+            <p class="lead">Total: <span id="totalPrice" class="text-primary fw-bold">0.00 €</span></p>
+            <button type="submit" class="btn btn-primary btn-lg px-5" id="btnBook" disabled>
+                Confirmar Reserva
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .screen {
+        background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+        height: 60px;
+        width: 80%;
+        margin: 0 auto;
+        transform: perspective(500px) rotateX(-30deg);
+        box-shadow: 0 20px 50px rgba(255,255,255,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,0.3);
+        letter-spacing: 5px;
+        border-top: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .seat {
+        width: 30px;
+        height: 30px;
+        background-color: #333;
+        border-radius: 6px 6px 0 0;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .seat:hover:not(.occupied) {
+        background-color: #555;
+        transform: scale(1.1);
+    }
+
+    .seat.selected {
+        background-color: var(--c-primary);
+        box-shadow: 0 0 10px var(--c-primary);
+    }
+
+    .seat.occupied {
+        background-color: #222;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+</style>
+
+<script>
+    const pricePerSeat = @Model.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+    const selectedSeats = new Set();
+
+    function toggleSeat(element) {
+        if (element.classList.contains('occupied')) return;
+
+        const id = element.getAttribute('data-id');
+
+        if (selectedSeats.has(id)) {
+            selectedSeats.delete(id);
+            element.classList.remove('selected');
+        } else {
+            selectedSeats.add(id);
+            element.classList.add('selected');
+        }
+
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const total = selectedSeats.size * pricePerSeat;
+        document.getElementById('totalPrice').innerText = total.toFixed(2) + ' €';
+        document.getElementById('selectedSeatsInput').value = Array.from(selectedSeats).join(',');
+        document.getElementById('btnBook').disabled = selectedSeats.size === 0;
+    }
+</script>

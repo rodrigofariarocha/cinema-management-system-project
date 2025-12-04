@@ -1,0 +1,179 @@
+@model IEnumerable<CinemaRocha.Models.Reservation>
+
+@{
+    ViewData["Title"] = "Meus Bilhetes";
+}
+
+<style>
+    .ticket-card {
+        background: var(--gradient-card);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .ticket-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 6px;
+        height: 100%;
+        background: var(--gradient-primary);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .ticket-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--c-border-light);
+    }
+    
+    .ticket-card:hover::before {
+        opacity: 1;
+    }
+    
+    .ticket-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .ticket-status.valid {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border: 1px solid #10b981;
+    }
+    
+    .ticket-status.expired {
+        background: rgba(107, 114, 128, 0.15);
+        color: #9ca3af;
+        border: 1px solid #6b7280;
+    }
+    
+    .ticket-info-box {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--c-border);
+    }
+    
+    .seat-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        background: rgba(255, 59, 48, 0.15);
+        color: var(--c-primary);
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 0.9rem;
+        border: 1px solid rgba(255, 59, 48, 0.3);
+        min-width: 50px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: var(--radius-xl);
+        border: 2px dashed var(--c-border);
+    }
+</style>
+
+<div class="container" style="margin-top: 60px; margin-bottom: 80px;">
+    <div style="animation: fadeInUp 0.6s ease-out;">
+        <h1 class="section-title mb-5">Meus Bilhetes</h1>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-ticket-perforated" style="font-size: 5rem; color: var(--c-text-muted); margin-bottom: 24px; display: block;"></i>
+                <h3 style="font-weight: 700; margin-bottom: 16px;">Ainda não tens bilhetes</h3>
+                <p class="lead text-muted mb-4">Explora os filmes em exibição e reserva os teus lugares!</p>
+                <a asp-controller="Home" asp-action="Index" class="btn-primary">
+                    <i class="bi bi-film"></i> Ver Filmes em Exibição
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var item in Model.OrderByDescending(r => r.Session.StartTime))
+                {
+                    var isValid = item.Session.StartTime > DateTime.Now;
+                    
+                    <div class="col-lg-6 col-xl-4">
+                        <div class="ticket-card">
+                            <div class="p-4">
+                                <!-- Status Badge -->
+                                <div class="d-flex justify-content-between align-items-start mb-4">
+                                    <span class="ticket-status @(isValid ? "valid" : "expired")">
+                                        <i class="bi bi-@(isValid ? "check-circle-fill" : "x-circle")"></i>
+                                        @(isValid ? "Válido" : "Expirado")
+                                    </span>
+                                </div>
+
+                                <!-- Movie Title -->
+                                <h4 style="font-weight: 800; font-size: 1.5rem; margin-bottom: 8px; line-height: 1.3;">
+                                    @item.Session.Movie.Title
+                                </h4>
+                                <p class="text-muted mb-4" style="font-size: 0.9rem;">
+                                    <i class="bi bi-door-open"></i> @item.Session.Room.Name
+                                </p>
+
+                                <!-- Date & Time -->
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6">
+                                        <div class="ticket-info-box">
+                                            <small class="text-muted d-block mb-1" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Data</small>
+                                            <div style="font-weight: 700; font-size: 1.1rem;">
+                                                @item.Session.StartTime.ToString("dd MMM")
+                                            </div>
+                                            <small class="text-muted">@item.Session.StartTime.ToString("yyyy")</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="ticket-info-box">
+                                            <small class="text-muted d-block mb-1" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Hora</small>
+                                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--c-primary);">
+                                                @item.Session.StartTime.ToString("HH:mm")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Seats -->
+                                <div class="mb-4">
+                                    <small class="text-muted d-block mb-3" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <i class="bi bi-geo-alt"></i> Lugares
+                                    </small>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var seat in item.Seats)
+                                        {
+                                            <span class="seat-badge">@seat.Row@seat.Number</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Action Button -->
+                                <a asp-action="Confirmation" asp-route-id="@item.Id" class="btn-outline w-100 d-flex align-items-center justify-content-center" style="padding: 14px;">
+                                    <i class="bi bi-qr-code"></i>
+                                    Ver Bilhete Digital
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

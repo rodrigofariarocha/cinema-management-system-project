@@ -1,0 +1,98 @@
+@model CinemaRocha.Models.Movie
+
+@{
+    ViewData["Title"] = "Novo Filme";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-header">
+    <div>
+        <h1 class="h2 fw-bold">Novo Filme</h1>
+        <p class="text-muted">Adicionar filme ao catálogo</p>
+    </div>
+    <a asp-action="Movies" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form asp-action="CreateMovie">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">Título</label>
+                        <input asp-for="Title" class="form-control bg-dark text-white border-secondary" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Genre" class="form-label">Género</label>
+                            <input asp-for="Genre" class="form-control bg-dark text-white border-secondary" />
+                            <span asp-validation-for="Genre" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Duration" class="form-label">Duração (minutos)</label>
+                            <input asp-for="Duration" class="form-control bg-dark text-white border-secondary" />
+                            <span asp-validation-for="Duration" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ImageUrl" class="form-label">URL da Imagem (Poster)</label>
+                        <input asp-for="ImageUrl" class="form-control bg-dark text-white border-secondary" />
+                        <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label">Sinopse</label>
+                        <textarea asp-for="Description" class="form-control bg-dark text-white border-secondary" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Movies" class="btn btn-outline-light">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4">Guardar Filme</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-dark border-secondary">
+            <div class="card-body text-center">
+                <p class="text-muted mb-2">Pré-visualização do Poster</p>
+                <div class="poster-wrapper mx-auto" style="width: 200px; height: 300px; background: #222; border-radius: 8px; overflow: hidden;">
+                    <img id="posterPreview" src="" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    <div id="posterPlaceholder" class="d-flex align-items-center justify-content-center h-100 text-muted">
+                        <i class="bi bi-image fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.getElementById('ImageUrl').addEventListener('input', function(e) {
+            const url = e.target.value;
+            const img = document.getElementById('posterPreview');
+            const placeholder = document.getElementById('posterPlaceholder');
+            
+            if (url) {
+                img.src = url;
+                img.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                img.style.display = 'none';
+                placeholder.style.display = 'flex';
+            }
+        });
+    </script>
+}

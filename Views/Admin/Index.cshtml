@@ -1,0 +1,75 @@
+@model CinemaRocha.Controllers.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-header">
+    <div>
+        <h1 class="h2 fw-bold">Dashboard</h1>
+        <p class="text-muted">Visão geral do cinema</p>
+    </div>
+    <a asp-action="CreateMovie" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Novo Filme
+    </a>
+</div>
+
+<!-- Stats Grid -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-currency-euro"></i>
+            </div>
+            <div class="stat-info">
+                <h3>@Model.TotalRevenue.ToString("N2")€</h3>
+                <p>Receita Total</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                <i class="bi bi-ticket-perforated"></i>
+            </div>
+            <div class="stat-info">
+                <h3>@Model.TotalReservations</h3>
+                <p>Bilhetes Vendidos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                <i class="bi bi-film"></i>
+            </div>
+            <div class="stat-info">
+                <h3>@Model.TotalMovies</h3>
+                <p>Filmes Ativos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <div class="stat-info">
+                <h3>@Model.TotalSessions</h3>
+                <p>Sessões Agendadas</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity Placeholder -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Atividade Recente</h5>
+        <button class="btn btn-sm btn-outline-secondary">Ver Tudo</button>
+    </div>
+    <div class="card-body text-center py-5">
+        <p class="text-muted">Ainda não há atividade recente para mostrar.</p>
+    </div>
+</div>

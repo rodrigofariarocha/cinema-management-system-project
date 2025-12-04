@@ -1,0 +1,73 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<div class="nav-actions" style="display: flex; align-items: center; gap: 20px;">
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="user-menu" style="position: relative;">
+        <button class="user-button" style="display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--c-border); padding: 10px 18px; border-radius: var(--radius-lg); color: var(--c-text-primary); cursor: pointer; transition: all 0.3s ease; font-family: 'Outfit', sans-serif; font-weight: 500;">
+            <i class="bi bi-person-circle" style="font-size: 1.2rem;"></i>
+            <span>@User.Identity?.Name?.Split("@")[0]</span>
+            <i class="bi bi-chevron-down" style="font-size: 0.8rem;"></i>
+        </button>
+        
+        <div class="user-dropdown" style="position: absolute; top: calc(100% + 12px); right: 0; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); min-width: 220px; box-shadow: var(--shadow-lg); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s ease; z-index: 1000;">
+            <div style="padding: 12px;">
+                <div style="padding: 12px; border-bottom: 1px solid var(--c-border); margin-bottom: 8px;">
+                    <div style="font-size: 0.85rem; color: var(--c-text-muted); margin-bottom: 4px;">Sessão iniciada como</div>
+                    <div style="font-weight: 600; color: var(--c-text-primary); font-size: 0.95rem;">@User.Identity?.Name</div>
+                </div>
+                
+                <a asp-area="Identity" asp-page="/Account/Manage/Index" style="display: flex; align-items: center; gap: 12px; padding: 12px; color: var(--c-text-secondary); border-radius: var(--radius-md); transition: all 0.2s ease; text-decoration: none;">
+                    <i class="bi bi-person"></i>
+                    <span>Gerir Conta</span>
+                </a>
+                
+                <a asp-controller="Tickets" asp-action="MyTickets" style="display: flex; align-items: center; gap: 12px; padding: 12px; color: var(--c-text-secondary); border-radius: var(--radius-md); transition: all 0.2s ease; text-decoration: none;">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span>Meus Bilhetes</span>
+                </a>
+                
+                <div style="border-top: 1px solid var(--c-border); margin: 8px 0; padding-top: 8px;">
+                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" style="margin: 0;">
+                        <button type="submit" style="display: flex; align-items: center; gap: 12px; padding: 12px; color: var(--c-primary); border-radius: var(--radius-md); transition: all 0.2s ease; width: 100%; background: none; border: none; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 500; font-size: 1rem;">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Sair</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .user-button:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--c-border-light);
+        }
+        
+        .user-menu:hover .user-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .user-dropdown a:hover,
+        .user-dropdown button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--c-text-primary);
+        }
+    </style>
+}
+else
+{
+    <a class="nav-link" asp-area="Identity" asp-page="/Account/Register" style="color: var(--c-text-secondary); font-weight: 500; transition: color 0.3s ease;">
+        Registar
+    </a>
+    <a class="btn-primary" asp-area="Identity" asp-page="/Account/Login" style="padding: 10px 24px; font-size: 0.95rem;">
+        <i class="bi bi-box-arrow-in-right"></i>
+        Entrar
+    </a>
+}
+</div>

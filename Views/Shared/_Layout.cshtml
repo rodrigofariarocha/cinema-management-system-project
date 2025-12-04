@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RochaCinema</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a class="logo" asp-controller="Home" asp-action="Index">
+                ROCHA<span>CINEMA</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" 
+                   asp-controller="Home" asp-action="Index">Home</a>
+                <a class="nav-link" href="#now-showing">Filmes</a>
+                <a class="nav-link" asp-controller="Home" asp-action="Privacy">Cinemas</a>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a class="nav-link" asp-controller="Tickets" asp-action="MyTickets">Meus Bilhetes</a>
+                }
+                @if (User.Identity.IsAuthenticated && User.Identity.Name == "admin@rochacinema.com")
+                {
+                    <a class="nav-link text-danger" asp-controller="Admin" asp-action="Index">Admin</a>
+                }
+            </nav>
+
+            <div class="nav-actions">
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="logo">ROCHA<span>CINEMA</span></div>
+                    <p>A melhor experiência de cinema. Salas premium, som imersivo e os últimos lançamentos.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" title="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Twitter">
+                            <i class="bi bi-twitter-x"></i>
+                        </a>
+                        <a href="#" class="social-link" title="YouTube">
+                            <i class="bi bi-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Filmes</h4>
+                    <ul>
+                        <li><a href="#">Em Exibição</a></li>
+                        <li><a href="#">Brevemente</a></li>
+                        <li><a href="#">IMAX</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Cinemas</h4>
+                    <ul>
+                        <li><a href="#">Localizações</a></li>
+                        <li><a href="#">Experiências</a></li>
+                        <li><a href="#">Preçário</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Suporte</h4>
+                    <ul>
+                        <li><a asp-controller="Home" asp-action="Contact">Contactos</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a asp-controller="Home" asp-action="Privacy">Política de Privacidade</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2025 RochaCinema. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
