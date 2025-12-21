@@ -90,6 +90,10 @@ img {
     display: block;
 }
 
+main {
+    padding-top: 100px;
+}
+
 /* ==========================================================================
    ANIMATIONS & KEYFRAMES
    ========================================================================== */
@@ -323,12 +327,14 @@ img {
    ========================================================================== */
 header {
     height: var(--header-height);
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 1px solid var(--glass-border);
-    position: sticky;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: none;
+    position: absolute;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -339,7 +345,7 @@ header {
     width: 100%;
     max-width: var(--container-width);
     margin: 0 auto;
-    padding: 0 32px;
+    padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -367,12 +373,12 @@ header {
 
 .nav-links {
     display: flex;
-    gap: 40px;
+    gap: 28px;
     align-items: center;
 }
 
 .nav-link {
-    color: var(--c-text-secondary);
+    color: var(--c-text-primary);
     font-weight: 500;
     font-size: 1rem;
     position: relative;
@@ -495,19 +501,21 @@ header {
 .container {
     max-width: var(--container-width);
     margin: 0 auto;
-    padding: 0 32px;
+    padding: 0 20px;
 }
 
 .movies-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 40px;
-    margin-bottom: 100px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 28px;
+    margin-bottom: 80px;
 }
 
 .movie-card {
-    background: var(--gradient-card);
-    border-radius: var(--radius-xl);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid transparent;
@@ -517,16 +525,7 @@ header {
     animation: fadeInUp 0.6s ease-out both;
 }
 
-.movie-card::before {
-    content: '';
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 20px;
-    border-top: 1px solid var(--c-border);
-    color: var(--c-text-muted);
-    font-size: 0.9rem;
-}
+
 
 .movie-meta span {
     display: flex;
@@ -542,7 +541,7 @@ header {
     justify-content: center;
     align-items: center;
     min-height: calc(100vh - var(--header-height));
-    padding: 60px 0;
+    padding: 20px 0 60px 0;
 }
 
 .auth-card {
@@ -629,7 +628,8 @@ header {
 }
 
 .stat-card {
-    background: var(--gradient-card);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
     border: 1px solid var(--c-border);
     border-radius: var(--radius-xl);
     padding: 30px;
@@ -752,7 +752,7 @@ header {
     border-radius: var(--radius-lg);
     display: flex;
     justify-content: center;
-    gap: 40px;
+    gap: 28px;
 }
 
 /* ==========================================================================
@@ -859,7 +859,8 @@ footer::before {
    BOOTSTRAP OVERRIDES (FOR IDENTITY PAGES)
    ========================================================================== */
 .card {
-    background: var(--gradient-card);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
     border: 1px solid var(--c-border);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-md);
@@ -966,7 +967,7 @@ h6 {
 
     .footer-grid {
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 28px;
     }
 
     .auth-card {

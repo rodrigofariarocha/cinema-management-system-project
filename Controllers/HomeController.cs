@@ -19,7 +19,12 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var movies = await _context.Movies.ToListAsync();
+        // Only show movies that have at least one session in the future
+        var movies = await _context.Movies
+            .Include(m => m.Sessions)
+            .Where(m => m.Sessions.Any(s => s.StartTime > DateTime.Now))
+            .ToListAsync();
+            
         return View(movies);
     }
 
@@ -37,5 +42,10 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    public IActionResult NotFound()
+    {
+        return View();
     }
 }

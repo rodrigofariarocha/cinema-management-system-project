@@ -27,7 +27,7 @@ namespace CinemaRocha.Models
         public decimal Price { get; set; }
 
         // Navigation properties
-        public Movie Movie { get; set; } = null!;
+        public Movie? Movie { get; set; }
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     }
 }

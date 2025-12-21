@@ -131,8 +131,101 @@ namespace CinemaRocha.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailSender.SendEmailAsync(Input.Email, "Confirme o seu Email - RochaCinema",
+                        $@"
+<!DOCTYPE html>
+<html lang='pt'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Confirme o seu Email - RochaCinema</title>
+</head>
+<body style='margin: 0; padding: 0; font-family: ""Outfit"", -apple-system, BlinkMacSystemFont, ""Segoe UI"", sans-serif; background-color: #0B0B0B;'>
+    <table role='presentation' style='width: 100%; border-collapse: collapse;'>
+        <tr>
+            <td style='padding: 40px 20px;'>
+                <table role='presentation' style='max-width: 600px; margin: 0 auto; background: linear-gradient(145deg, rgba(22, 22, 22, 0.95), rgba(11, 11, 11, 0.98)); border-radius: 24px; overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);'>
+                    <!-- Header -->
+                    <tr>
+                        <td style='padding: 40px 40px 30px; text-align: center; background: linear-gradient(135deg, rgba(255, 59, 48, 0.1), transparent);'>
+                            <h1 style='margin: 0; font-size: 32px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.5px;'>
+                                ROCHA<span style='background: linear-gradient(135deg, #FF3B30, #FF6B5E); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>CINEMA</span>
+                            </h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Icon -->
+                    <tr>
+                        <td style='padding: 0 40px 30px; text-align: center;'>
+                            <div style='width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #FF3B30, #FF6B5E); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 40px rgba(255, 59, 48, 0.3);'>
+                                <span style='font-size: 40px; color: white;'>✉️</span>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style='padding: 0 40px 40px;'>
+                            <h2 style='margin: 0 0 20px; font-size: 28px; font-weight: 800; color: #FFFFFF; text-align: center;'>
+                                Bem-vindo ao RochaCinema!
+                            </h2>
+                            <p style='margin: 0 0 16px; color: #9CA3AF; font-size: 16px; line-height: 1.6; text-align: center;'>
+                                Obrigado por se registar! Estamos entusiasmados por tê-lo connosco.
+                            </p>
+                            <p style='margin: 0 0 32px; color: #9CA3AF; font-size: 16px; line-height: 1.6; text-align: center;'>
+                                Para começar a explorar os nossos filmes e fazer reservas, por favor confirme o seu endereço de email clicando no botão abaixo:
+                            </p>
+                            
+                            <!-- CTA Button -->
+                            <table role='presentation' style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='text-align: center; padding: 0 0 32px;'>
+                                        <a href='{HtmlEncoder.Default.Encode(callbackUrl)}' 
+                                           style='display: inline-block; background: linear-gradient(135deg, #FF3B30, #FF6B5E); color: white; padding: 16px 48px; border-radius: 16px; text-decoration: none; font-weight: 600; font-size: 16px; box-shadow: 0 4px 20px rgba(255, 59, 48, 0.3); transition: all 0.3s ease;'>
+                                            ✓ Confirmar Email
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style='margin: 0 0 16px; color: #6B7280; font-size: 14px; line-height: 1.6; text-align: center;'>
+                                Se não criou esta conta, pode ignorar este email em segurança.
+                            </p>
+                            <p style='margin: 0; color: #6B7280; font-size: 14px; line-height: 1.6; text-align: center;'>
+                                Este link é válido por 24 horas.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style='padding: 32px 40px; background: rgba(11, 11, 11, 0.5); border-top: 1px solid rgba(255, 255, 255, 0.05);'>
+                            <p style='margin: 0 0 8px; color: #6B7280; font-size: 13px; text-align: center;'>
+                                A melhor experiência de cinema. Salas premium, som imersivo e os últimos lançamentos.
+                            </p>
+                            <p style='margin: 0; color: #4B5563; font-size: 12px; text-align: center;'>
+                                © 2024 RochaCinema. Todos os direitos reservados.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+                <!-- Alternative Link -->
+                <table role='presentation' style='max-width: 600px; margin: 20px auto 0;'>
+                    <tr>
+                        <td style='padding: 0 20px;'>
+                            <p style='margin: 0; color: #4B5563; font-size: 12px; line-height: 1.6; word-break: break-all;'>
+                                Se o botão não funcionar, copie e cole este link no seu navegador:<br>
+                                <a href='{HtmlEncoder.Default.Encode(callbackUrl)}' style='color: #FF3B30; text-decoration: none;'>{HtmlEncoder.Default.Encode(callbackUrl)}</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

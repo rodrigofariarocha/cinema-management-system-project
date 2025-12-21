@@ -3,56 +3,885 @@
 @{
     ViewData["Title"] = "Gestão de Sessões";
     Layout = "_AdminLayout";
+    var sessionsByDate = Model.OrderBy(s => s.StartTime).GroupBy(s => s.StartTime.Date);
 }
 
-<div class="admin-header">
+<style>
+    .sessions-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+
+    .sessions-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--c-text);
+    }
+
+    .sessions-header p {
+        color: var(--c-text-muted);
+        margin: 4px 0 0 0;
+    }
+
+    .btn-new-session {
+        padding: 13px 26px;
+        background: var(--c-primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s ease;
+        font-size: 0.938rem;
+    }
+
+    .btn-new-session:hover {
+        background: #dc2626;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.35);
+        color: white;
+    }
+
+    .btn-ai-session {
+        padding: 13px 26px;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s ease;
+        font-size: 0.938rem;
+        cursor: pointer;
+    }
+
+    .btn-ai-session:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .date-section {
+        margin-bottom: 32px;
+    }
+
+    .date-header {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--c-text);
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .sessions-grid {
+        display: grid;
+        gap: 16px;
+    }
+
+    .session-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        transition: all 0.3s ease;
+        display: grid;
+        grid-template-columns: 100px 1fr auto auto;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .session-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(239, 68, 68, 0.3);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .session-time {
+        text-align: center;
+        padding: 12px;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: var(--radius-md);
+    }
+
+    .session-time-hour {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--c-primary);
+        line-height: 1;
+    }
+
+    .session-time-period {
+        font-size: 0.75rem;
+        color: var(--c-text-muted);
+        margin-top: 4px;
+    }
+
+    .session-info {
+        flex: 1;
+    }
+
+    .session-movie {
+        font-weight: 600;
+        font-size: 1.063rem;
+        color: var(--c-text);
+        margin-bottom: 6px;
+    }
+
+    .session-details {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .session-detail {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        color: var(--c-text-muted);
+    }
+
+    .session-detail i {
+        color: var(--c-primary);
+        font-size: 1rem;
+    }
+
+    .session-price {
+        text-align: right;
+    }
+
+    .price-label {
+        font-size: 0.688rem;
+        color: var(--c-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+        opacity: 0.6;
+    }
+
+    .price-value {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--c-primary);
+        line-height: 1;
+    }
+
+    .session-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-action-session {
+        padding: 10px 14px;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid;
+    }
+
+    .btn-edit-session {
+        background: rgba(59, 130, 246, 0.1);
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-edit-session:hover {
+        background: rgba(59, 130, 246, 0.25);
+        border-color: rgba(59, 130, 246, 0.6);
+        transform: translateY(-2px);
+        color: #60a5fa;
+    }
+
+    .btn-delete-session {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-delete-session:hover {
+        background: rgba(239, 68, 68, 0.25);
+        border-color: rgba(239, 68, 68, 0.6);
+        transform: translateY(-2px);
+        color: #f87171;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 120px 20px;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        opacity: 0.15;
+        margin-bottom: 24px;
+        display: block;
+        color: var(--c-text-muted);
+    }
+
+    .empty-state h3 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--c-text);
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        color: var(--c-text-muted);
+        font-size: 0.938rem;
+        opacity: 0.7;
+    }
+
+    @@media (max-width: 992px) {
+        .session-card {
+            grid-template-columns: 80px 1fr;
+            gap: 16px;
+        }
+
+        .session-price,
+        .session-actions {
+            grid-column: 2;
+            justify-self: start;
+        }
+
+        .session-price {
+            margin-top: 8px;
+        }
+    }
+</style>
+
+<div class="sessions-header">
     <div>
-        <h1 class="h2 fw-bold">Sessões</h1>
-        <p class="text-muted">Agendar e gerir sessões</p>
+        <h1>Sessões</h1>
+        <p>Agendar e gerir sessões</p>
     </div>
-    <a asp-action="CreateSession" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Nova Sessão
-    </a>
+    <div style="display: flex; gap: 12px;">
+        <button onclick="openAIModal()" class="btn-ai-session">
+            <i class="bi bi-stars"></i> Gerar com IA
+        </button>
+        <a asp-action="CreateSession" class="btn-new-session">
+            <i class="bi bi-plus-lg"></i> Nova Sessão
+        </a>
+    </div>
 </div>
 
-<div class="card">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="ps-4">Data/Hora</th>
-                        <th>Filme</th>
-                        <th>Sala</th>
-                        <th>Preço</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.OrderBy(s => s.StartTime))
-                    {
-                        <tr>
-                            <td class="ps-4">
-                                <div class="fw-bold">@item.StartTime.ToString("dd/MM/yyyy")</div>
-                                <div class="small text-muted">@item.StartTime.ToString("HH:mm")</div>
-                            </td>
-                            <td>@item.Movie?.Title</td>
-                            <td>@item.Room?.Name</td>
-                            <td>@item.Price.ToString("C")</td>
-                            <td>
-                                <div class="btn-group">
-                                    <a asp-action="EditSession" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a asp-action="DeleteSession" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <i class="bi bi-calendar-x"></i>
+        <h3>Nenhuma sessão agendada</h3>
+        <p>Crie a primeira sessão usando o botão acima</p>
+    </div>
+}
+else
+{
+    @foreach (var dateGroup in sessionsByDate)
+    {
+        <div class="date-section">
+            <div class="date-header">
+                <i class="bi bi-calendar3"></i>
+                @dateGroup.Key.ToString("dddd, dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("pt-PT"))
+            </div>
+            <div class="sessions-grid">
+                @foreach (var session in dateGroup)
+                {
+                    <div class="session-card">
+                        <div class="session-time">
+                            <div class="session-time-hour">@session.StartTime.ToString("HH:mm")</div>
+                            <div class="session-time-period">@(session.StartTime.Hour < 12 ? "Manhã" : session.StartTime.Hour < 18 ? "Tarde" : "Noite")</div>
+                        </div>
+
+                        <div class="session-info">
+                            <div class="session-movie">@session.Movie?.Title</div>
+                            <div class="session-details">
+                                <div class="session-detail">
+                                    <i class="bi bi-door-open"></i>
+                                    <span>@session.Room?.Name</span>
                                 </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                <div class="session-detail">
+                                    <i class="bi bi-people"></i>
+                                    <span>@session.Room?.Capacity lugares</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="session-price">
+                            <div class="price-label">Preço</div>
+                            <div class="price-value">@session.Price.ToString("C")</div>
+                        </div>
+
+                        <div class="session-actions">
+                            <a asp-action="EditSession" asp-route-id="@session.Id" class="btn-action-session btn-edit-session" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a asp-action="DeleteSession" asp-route-id="@session.Id" class="btn-action-session btn-delete-session" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+
+<!-- AI Modal -->
+<div id="aiModal" class="ai-modal">
+    <div class="ai-modal-content">
+        <div class="ai-modal-header">
+            <h3><i class="bi bi-stars"></i> Gerar Sessões com IA</h3>
+            <button onclick="closeAIModal()" class="ai-close-btn"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="ai-chat-container" id="chatContainer">
+            <div class="ai-message ai-bot">
+                <i class="bi bi-robot"></i>
+                <div class="ai-bubble">
+                    Olá! Sou o assistente de sessões. Descreve as sessões que queres criar.
+                    <br><br>
+                    <strong>Exemplo:</strong> "Cria sessões para o Avatar na Sala 1, amanhã às 14h, 17h e 21h, com preço de 8€"
+                </div>
+            </div>
+        </div>
+        <div class="ai-input-container">
+            <input type="text" id="aiPrompt" placeholder="Descreve as sessões que queres criar..." onkeydown="if(event.key==='Enter') sendAIMessage()">
+            <button onclick="sendAIMessage()" id="sendBtn">
+                <i class="bi bi-send-fill"></i>
+            </button>
         </div>
     </div>
 </div>
+
+<style>
+    .ai-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        backdrop-filter: blur(10px);
+    }
+
+    .ai-modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .ai-modal-content {
+        background: #121212;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 28px;
+        width: 95%;
+        max-width: 800px;
+        height: 90vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    @@keyframes slideUp {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .ai-modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+    }
+
+    .ai-modal-header h3 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: linear-gradient(135deg, #60a5fa, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+    }
+
+    .ai-close-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ai-close-btn:hover {
+        background: rgba(239, 68, 68, 0.3);
+    }
+
+    .ai-chat-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .ai-message {
+        display: flex;
+        gap: 12px;
+        max-width: 85%;
+    }
+
+    .ai-message.ai-bot {
+        align-self: flex-start;
+    }
+
+    .ai-message.ai-user {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+
+    .ai-message i {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ai-bot i {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+    }
+
+    .ai-user i {
+        background: var(--c-primary);
+        color: white;
+    }
+
+    .ai-bubble {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 16px 20px;
+        font-size: 0.975rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+
+    .ai-bot .ai-bubble {
+        border-bottom-left-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .ai-user .ai-bubble {
+        border-bottom-right-radius: 4px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        border-color: rgba(96, 165, 250, 0.3);
+        color: white;
+    }
+
+    .ai-input-container {
+        padding: 16px 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        gap: 12px;
+    }
+
+    .ai-input-container input {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 16px 22px;
+        color: white;
+        font-size: 1rem;
+        font-family: 'Outfit', sans-serif;
+        transition: all 0.2s ease;
+    }
+
+    .ai-input-container input:focus {
+        outline: none;
+        border-color: #60a5fa;
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1);
+    }
+
+    .ai-input-container button {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        border: none;
+        border-radius: 12px;
+        width: 50px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ai-input-container button:hover {
+        transform: scale(1.05);
+    }
+
+    .ai-input-container button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .session-preview {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 8px;
+        margin-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .session-preview-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 16px 24px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 18px;
+        transition: all 0.2s ease;
+    }
+
+    .session-preview-item.action-edit {
+        border-left: 4px solid #3b82f6;
+        background: rgba(59, 130, 246, 0.05);
+    }
+
+    .session-preview-item.action-delete {
+        border-left: 4px solid #f87171;
+        background: rgba(248, 113, 113, 0.05);
+    }
+
+    .session-preview-item.action-delete .session-info {
+        opacity: 0.7;
+    }
+
+    .session-preview-item.action-delete i {
+        background: rgba(248, 113, 113, 0.1);
+        color: #f87171;
+    }
+
+    .session-preview-item.action-delete .session-title {
+        color: #fca5a5;
+    }
+
+    .session-preview-item.action-create {
+        border-left: 4px solid #10b981;
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .session-preview-item.action-create i {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .session-preview-item.action-create .session-title {
+        color: #34d399;
+    }
+
+    .action-badge {
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 6px 10px;
+        border-radius: 8px;
+        letter-spacing: 0.5px;
+        margin-left: auto;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .badge-create { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .badge-edit { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .badge-delete { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+    .session-preview-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .session-preview-item i {
+        width: 40px;
+        height: 40px;
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .session-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .session-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: white;
+    }
+
+    .session-details {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-create-sessions {
+        margin-top: 18px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border: none;
+        padding: 16px 20px;
+        border-radius: 18px;
+        color: white;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        width: 100%;
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 100%;
+        margin-top: 20px;
+        padding: 18px;
+        border: none;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .btn-create-sessions:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 25px rgba(59, 130, 246, 0.3);
+        filter: brightness(1.1);
+    }
+
+    .btn-create-sessions i {
+        font-size: 1.4rem;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 6px;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-create-sessions:active {
+        transform: translateY(0);
+    }
+
+    .loading-dots {
+        display: inline-flex;
+        gap: 4px;
+    }
+
+    .loading-dots span {
+        width: 8px;
+        height: 8px;
+        background: #3b82f6;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+    @@keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+    }
+</style>
+
+<script>
+    let pendingSessions = [];
+
+    function openAIModal() {
+        document.getElementById('aiModal').classList.add('active');
+        document.getElementById('aiPrompt').focus();
+    }
+
+    function closeAIModal() {
+        document.getElementById('aiModal').classList.remove('active');
+    }
+
+    function addMessage(content, isUser) {
+        const container = document.getElementById('chatContainer');
+        const msg = document.createElement('div');
+        msg.className = `ai-message ${isUser ? 'ai-user' : 'ai-bot'}`;
+        msg.innerHTML = `
+            <i class="bi bi-${isUser ? 'person-fill' : 'robot'}"></i>
+            <div class="ai-bubble">${content}</div>
+        `;
+        container.appendChild(msg);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function addLoadingMessage() {
+        const container = document.getElementById('chatContainer');
+        const msg = document.createElement('div');
+        msg.className = 'ai-message ai-bot';
+        msg.id = 'loadingMsg';
+        msg.innerHTML = `
+            <i class="bi bi-robot"></i>
+            <div class="ai-bubble">
+                <div class="loading-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        `;
+        container.appendChild(msg);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function removeLoadingMessage() {
+        const loading = document.getElementById('loadingMsg');
+        if (loading) loading.remove();
+    }
+
+    async function sendAIMessage() {
+        const input = document.getElementById('aiPrompt');
+        const prompt = input.value.trim();
+        if (!prompt) return;
+
+        addMessage(prompt, true);
+        input.value = '';
+        input.disabled = true;
+        document.getElementById('sendBtn').disabled = true;
+        addLoadingMessage();
+
+        try {
+            const response = await fetch('/Admin/GenerateSessionsWithAI', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt })
+            });
+            const data = await response.json();
+            removeLoadingMessage();
+
+            if (data.success && data.sessions && data.sessions.length > 0) {
+                pendingSessions = data.sessions;
+                let content = `<div style="margin-bottom: 15px;">${data.message}</div><div class="session-preview">`;
+                data.sessions.forEach(s => {
+                    const actionClass = s.action === 'EDIT' ? 'action-edit' : (s.action === 'DELETE' ? 'action-delete' : 'action-create');
+                    const badgeClass = s.action === 'EDIT' ? 'badge-edit' : (s.action === 'DELETE' ? 'badge-delete' : 'badge-create');
+                    const icon = s.action === 'DELETE' ? 'bi-trash' : (s.action === 'EDIT' ? 'bi-pencil' : 'bi-plus-circle');
+                    
+                    const dateText = s.date && s.time ? `• ${s.date} ${s.time}` : '';
+                    const priceText = s.price ? ` • ${s.price}€` : '';
+                    const roomText = s.roomName || 'Sala atual';
+                    
+                    content += `
+                    <div class="session-preview-item ${actionClass}">
+                        <i class="bi ${icon}"></i>
+                        <div class="session-info">
+                            <span class="session-title">${s.movieTitle || 'Sessão #' + s.id}</span>
+                            <span class="session-details">${roomText} ${dateText}${priceText}</span>
+                        </div>
+                        <span class="action-badge ${badgeClass}">${s.action || 'CREATE'}</span>
+                    </div>`;
+                });
+                content += `</div><button class="btn-create-sessions" onclick="createSessions()">
+                    Confirmar Alterações <i class="bi bi-check-lg"></i>
+                </button>`;
+                addMessage(content, false);
+            } else {
+                addMessage(data.message || 'Não consegui gerar sessões. Tenta novamente.', false);
+            }
+        } catch (error) {
+            removeLoadingMessage();
+            addMessage('Ocorreu um erro. Tenta novamente.', false);
+        }
+
+        input.disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        input.focus();
+    }
+
+    async function createSessions() {
+        if (pendingSessions.length === 0) return;
+
+        try {
+            const response = await fetch('/Admin/CreateAISessions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessions: pendingSessions })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                let msg = '✅ Operações concluídas!\n';
+                if (data.created > 0) msg += `• ${data.created} sessões criadas\n`;
+                if (data.updated > 0) msg += `• ${data.updated} sessões editadas\n`;
+                if (data.deleted > 0) msg += `• ${data.deleted} sessões eliminadas\n`;
+                if (data.errors > 0) msg += `• ${data.errors} erros encontrados (ex: reservas ativas)\n`;
+                
+                addMessage(msg + 'A atualizar...', false);
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                addMessage('Erro ao criar sessões.', false);
+            }
+        } catch (error) {
+            addMessage('Erro ao criar sessões.', false);
+        }
+        pendingSessions = [];
+    }
+
+    // Close modal on ESC
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeAIModal();
+    });
+</script>

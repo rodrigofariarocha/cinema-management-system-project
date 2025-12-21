@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - RochaCinema Admin</title>
+    <title>Rocha Cinema</title>
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+    <link rel="icon" type="image/png" href="/img/logo.png">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
     <style>
@@ -114,7 +116,9 @@
     <div class="admin-container">
         <!-- Sidebar -->
         <aside class="admin-sidebar">
-            <a href="/" class="sidebar-brand">ROCHA<span>ADMIN</span></a>
+            <a href="/" class="sidebar-brand">
+                ROCHA<span>ADMIN</span>
+            </a>
             
             <nav class="sidebar-nav">
                 <a asp-controller="Admin" asp-action="Index" class="nav-item-admin @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">

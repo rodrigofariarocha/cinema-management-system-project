@@ -5,51 +5,282 @@
     Layout = "_AdminLayout";
 }
 
-<div class="admin-header">
+<style>
+    .rooms-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+
+    .rooms-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--c-text);
+    }
+
+    .rooms-header p {
+        color: var(--c-text-muted);
+        margin: 4px 0 0 0;
+    }
+
+    .btn-new-room {
+        padding: 13px 26px;
+        background: var(--c-primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s ease;
+        font-size: 0.938rem;
+    }
+
+    .btn-new-room:hover {
+        background: #dc2626;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.35);
+        color: white;
+    }
+
+    .rooms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        max-width: 900px;
+    }
+
+    .room-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .room-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(239, 68, 68, 0.3);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .room-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .room-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: var(--c-primary);
+        flex-shrink: 0;
+    }
+
+    .room-title {
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .room-name {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--c-text);
+        margin: 0;
+    }
+
+    .room-stats {
+        margin-bottom: 18px;
+    }
+
+    .room-stat {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+    }
+
+    .stat-label {
+        font-size: 0.688rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--c-text-muted);
+        margin-bottom: 8px;
+        opacity: 0.7;
+    }
+
+    .stat-value {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--c-text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .stat-value i {
+        font-size: 1.5rem;
+        color: var(--c-primary);
+    }
+
+    .stat-unit {
+        font-size: 0.938rem;
+        font-weight: 500;
+        color: var(--c-text-muted);
+    }
+
+    .room-actions {
+        display: flex;
+        gap: 8px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-action-room {
+        flex: 1;
+        padding: 10px 16px;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-edit-room {
+        background: rgba(59, 130, 246, 0.1);
+        color: #60a5fa;
+    }
+
+    .btn-edit-room:hover {
+        background: rgba(59, 130, 246, 0.25);
+        border-color: rgba(59, 130, 246, 0.6);
+        transform: translateY(-2px);
+        color: #60a5fa;
+    }
+
+    .btn-delete-room {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+    }
+
+    .btn-delete-room:hover {
+        background: rgba(239, 68, 68, 0.25);
+        border-color: rgba(239, 68, 68, 0.6);
+        transform: translateY(-2px);
+        color: #f87171;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 120px 20px;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        opacity: 0.15;
+        margin-bottom: 24px;
+        display: block;
+        color: var(--c-text-muted);
+    }
+
+    .empty-state h3 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--c-text);
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        color: var(--c-text-muted);
+        font-size: 0.938rem;
+        opacity: 0.7;
+    }
+
+    @@media (max-width: 768px) {
+        .rooms-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="rooms-header">
     <div>
-        <h1 class="h2 fw-bold">Salas</h1>
-        <p class="text-muted">Gerir as salas de cinema</p>
+        <h1>Salas</h1>
+        <p>Gerir as salas de cinema</p>
     </div>
-    <a asp-action="CreateRoom" class="btn btn-primary">
+    <a asp-action="CreateRoom" class="btn-new-room">
         <i class="bi bi-plus-lg"></i> Nova Sala
     </a>
 </div>
 
-<div class="card">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="ps-4">Nome</th>
-                        <th>Capacidade</th>
-                        <th>Lugares Gerados</th>
-                        <th class="text-end pe-4">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="ps-4 fw-bold">@item.Name</td>
-                            <td>@item.Capacity pessoas</td>
-                            <td>
-                                <span class="badge bg-secondary">Auto-gerados</span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <div class="btn-group">
-                                    <a asp-action="EditRoom" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a asp-action="DeleteRoom" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" onclick="return confirm('Tem a certeza?');">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <i class="bi bi-door-closed"></i>
+        <h3>Nenhuma sala criada</h3>
+        <p>Crie a primeira sala usando o botão acima</p>
     </div>
-</div>
+}
+else
+{
+    <div class="rooms-grid">
+        @foreach (var room in Model)
+        {
+            <div class="room-card">
+                <div class="room-header">
+                    <div class="room-icon">
+                        <i class="bi bi-door-open"></i>
+                    </div>
+                    <div class="room-title">
+                        <h3 class="room-name">@room.Name</h3>
+                    </div>
+                </div>
+
+                <div class="room-stats">
+                    <div class="room-stat">
+                        <div class="stat-label">Capacidade Total</div>
+                        <div class="stat-value">
+                            <i class="bi bi-people-fill"></i>
+                            @room.Capacity
+                            <span class="stat-unit">lugares</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="room-actions">
+                    <a asp-action="EditRoom" asp-route-id="@room.Id" class="btn-action-room btn-edit-room">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <a asp-action="DeleteRoom" asp-route-id="@room.Id" class="btn-action-room btn-delete-room">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+}

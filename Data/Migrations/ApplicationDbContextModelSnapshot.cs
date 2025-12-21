@@ -22,6 +22,58 @@ namespace CinemaRocha.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CinemaRocha.Models.Coupon", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CurrentUses")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("DiscountValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MaxUses")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ValidFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ValidTo")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Coupons");
+                });
+
             modelBuilder.Entity("CinemaRocha.Models.Movie", b =>
                 {
                     b.Property<int>("Id")
@@ -29,6 +81,9 @@ namespace CinemaRocha.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BackdropUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -47,6 +102,9 @@ namespace CinemaRocha.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("LogoUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("datetime2");
 
@@ -54,6 +112,9 @@ namespace CinemaRocha.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TrailerUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -101,10 +162,18 @@ namespace CinemaRocha.Data.Migrations
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
 
+                    b.Property<string>("Features")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -169,6 +238,81 @@ namespace CinemaRocha.Data.Migrations
                     b.HasIndex("RoomId");
 
                     b.ToTable("Sessions");
+                });
+
+            modelBuilder.Entity("CinemaRocha.Models.UserCoupon", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CouponId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("QRCodeData")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("UserLoyaltyId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CouponId");
+
+                    b.HasIndex("ReservationId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserLoyaltyId");
+
+                    b.ToTable("UserCoupons");
+                });
+
+            modelBuilder.Entity("CinemaRocha.Models.UserLoyalty", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AvailablePoints")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalPoints")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserLoyalties");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -394,7 +538,7 @@ namespace CinemaRocha.Data.Migrations
 
             modelBuilder.Entity("CinemaRocha.Models.Seat", b =>
                 {
-                    b.HasOne("CinemaRocha.Models.Reservation", null)
+                    b.HasOne("CinemaRocha.Models.Reservation", "Reservation")
                         .WithMany("Seats")
                         .HasForeignKey("ReservationId");
 
@@ -403,6 +547,8 @@ namespace CinemaRocha.Data.Migrations
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Reservation");
 
                     b.Navigation("Room");
                 });
@@ -424,6 +570,47 @@ namespace CinemaRocha.Data.Migrations
                     b.Navigation("Movie");
 
                     b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("CinemaRocha.Models.UserCoupon", b =>
+                {
+                    b.HasOne("CinemaRocha.Models.Coupon", "Coupon")
+                        .WithMany("UserCoupons")
+                        .HasForeignKey("CouponId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CinemaRocha.Models.Reservation", "Reservation")
+                        .WithMany()
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CinemaRocha.Models.UserLoyalty", null)
+                        .WithMany("UserCoupons")
+                        .HasForeignKey("UserLoyaltyId");
+
+                    b.Navigation("Coupon");
+
+                    b.Navigation("Reservation");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CinemaRocha.Models.UserLoyalty", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -477,6 +664,11 @@ namespace CinemaRocha.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CinemaRocha.Models.Coupon", b =>
+                {
+                    b.Navigation("UserCoupons");
+                });
+
             modelBuilder.Entity("CinemaRocha.Models.Movie", b =>
                 {
                     b.Navigation("Sessions");
@@ -495,6 +687,11 @@ namespace CinemaRocha.Data.Migrations
             modelBuilder.Entity("CinemaRocha.Models.Session", b =>
                 {
                     b.Navigation("Reservations");
+                });
+
+            modelBuilder.Entity("CinemaRocha.Models.UserLoyalty", b =>
+                {
+                    b.Navigation("UserCoupons");
                 });
 #pragma warning restore 612, 618
         }

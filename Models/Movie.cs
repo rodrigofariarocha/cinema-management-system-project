@@ -27,6 +27,15 @@ namespace CinemaRocha.Models
         [Url(ErrorMessage = "Please provide a valid URL")]
         public string ImageUrl { get; set; } = string.Empty;
 
+        [Url(ErrorMessage = "Please provide a valid URL")]
+        public string? TrailerUrl { get; set; }
+
+        [Url(ErrorMessage = "Please provide a valid URL")]
+        public string? LogoUrl { get; set; }
+
+        [Url(ErrorMessage = "Please provide a valid URL")]
+        public string? BackdropUrl { get; set; }
+
         [Required(ErrorMessage = "Release date is required")]
         [DataType(DataType.Date)]
         public DateTime ReleaseDate { get; set; }

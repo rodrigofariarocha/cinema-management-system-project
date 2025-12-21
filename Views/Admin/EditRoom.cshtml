@@ -5,39 +5,274 @@
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-transparent border-0 pt-4 pb-0">
-                    <h3 class="card-title fw-bold">Editar Sala</h3>
-                </div>
-                <div class="card-body p-4">
-                    <form asp-action="EditRoom">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                        <input type="hidden" asp-for="Id" />
-                        
-                        <div class="mb-3">
-                            <label asp-for="Name" class="form-label">Nome da Sala</label>
-                            <input asp-for="Name" class="form-control" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
-                        </div>
+<style>
+    .room-edit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
 
-                        <div class="mb-4">
-                            <label asp-for="Capacity" class="form-label">Capacidade</label>
-                            <input asp-for="Capacity" class="form-control" type="number" readonly />
-                            <div class="form-text text-warning">
-                                <i class="bi bi-exclamation-triangle"></i> A capacidade não pode ser alterada após a criação para preservar a integridade dos lugares.
-                            </div>
-                            <span asp-validation-for="Capacity" class="text-danger"></span>
-                        </div>
+    .room-edit-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--c-text);
+    }
 
-                        <div class="d-flex gap-2 justify-content-end">
-                            <a asp-action="Rooms" class="btn btn-outline-secondary">Cancelar</a>
-                            <button type="submit" class="btn btn-primary px-4">Guardar Alterações</button>
-                        </div>
-                    </form>
+    .room-edit-header p {
+        color: var(--c-text-muted);
+        margin: 4px 0 0 0;
+    }
+
+    .room-edit-container {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 32px;
+    }
+
+    .room-edit-form {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+    }
+
+    .room-sidebar {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        height: fit-content;
+        position: sticky;
+        top: 24px;
+    }
+
+    .sidebar-title {
+        font-weight: 700;
+        font-size: 1.125rem;
+        margin-bottom: 16px;
+        color: var(--c-text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sidebar-info {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
+    .sidebar-info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--c-text-muted);
+        margin-bottom: 6px;
+    }
+
+    .sidebar-info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--c-text);
+    }
+
+    .form-group-edit {
+        margin-bottom: 24px;
+    }
+
+    .form-label-edit {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--c-text);
+        font-size: 0.938rem;
+    }
+
+    .form-control-edit {
+        width: 100%;
+        padding: 14px 18px;
+        background: rgba(11, 11, 11, 0.6);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-md);
+        color: var(--c-text);
+        font-size: 1rem;
+        transition: all 0.25s ease;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .form-control-edit:focus {
+        outline: none;
+        border-color: var(--c-primary);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        background: rgba(11, 11, 11, 0.8);
+    }
+
+    .form-control-edit:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .warning-box {
+        background: rgba(251, 191, 36, 0.1);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin-top: 12px;
+    }
+
+    .warning-box i {
+        color: #fbbf24;
+        font-size: 1.25rem;
+        margin-top: 2px;
+    }
+
+    .warning-box-content {
+        flex: 1;
+    }
+
+    .warning-box-title {
+        font-weight: 600;
+        color: #fbbf24;
+        margin-bottom: 4px;
+        font-size: 0.938rem;
+    }
+
+    .warning-box-text {
+        color: var(--c-text-muted);
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .form-actions-edit {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-action-edit {
+        flex: 1;
+        padding: 14px 24px;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-cancel-edit {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--c-text);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-cancel-edit:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        color: var(--c-text);
+    }
+
+    .btn-save-edit {
+        background: var(--c-primary);
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        letter-spacing: 0.3px;
+        border: 2px solid var(--c-primary);
+    }
+
+    .btn-save-edit:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(239, 68, 68, 0.35);
+    }
+
+    @@media (max-width: 992px) {
+        .room-edit-container {
+            grid-template-columns: 1fr;
+        }
+
+        .room-sidebar {
+            position: static;
+        }
+    }
+</style>
+
+<div class="room-edit-header">
+    <div>
+        <h1>Editar Sala</h1>
+        <p>Atualizar as informações da sala</p>
+    </div>
+</div>
+
+<div class="room-edit-container">
+    <div class="room-edit-form">
+        <form asp-action="EditRoom" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="form-group-edit">
+                <label asp-for="Name" class="form-label-edit">Nome da Sala</label>
+                <input asp-for="Name" class="form-control-edit" placeholder="Digite o nome da sala" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-edit">
+                <label asp-for="Capacity" class="form-label-edit">Capacidade</label>
+                <input asp-for="Capacity" class="form-control-edit" type="number" readonly />
+                
+                <div class="warning-box">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div class="warning-box-content">
+                        <div class="warning-box-title">Campo Bloqueado</div>
+                        <div class="warning-box-text">A capacidade não pode ser alterada após a criação para preservar a integridade dos lugares.</div>
+                    </div>
                 </div>
+                
+                <span asp-validation-for="Capacity" class="text-danger"></span>
+            </div>
+
+            <div class="form-actions-edit">
+                <a asp-action="Rooms" class="btn-action-edit btn-cancel-edit">Cancelar</a>
+                <button type="submit" class="btn-action-edit btn-save-edit">Guardar Alterações</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="room-sidebar">
+        <div class="sidebar-title">
+            <i class="bi bi-info-circle"></i> Informações
+        </div>
+        
+        <div class="sidebar-info">
+            <div class="sidebar-info-label">ID da Sala</div>
+            <div class="sidebar-info-value">#@Model.Id</div>
+        </div>
+
+        <div class="sidebar-info">
+            <div class="sidebar-info-label">Capacidade</div>
+            <div class="sidebar-info-value">@Model.Capacity lugares</div>
+        </div>
+
+        <div class="sidebar-info">
+            <div class="sidebar-info-label">Última Atualização</div>
+            <div class="sidebar-info-value" style="font-size: 0.875rem;">
+                @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
             </div>
         </div>
     </div>
