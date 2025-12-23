@@ -342,6 +342,9 @@
         <p>Gerir catálogo de filmes</p>
     </div>
     <div style="display: flex; gap: 12px;">
+        <button onclick="populateRatings()" class="btn-new-movie" style="background: rgba(245, 197, 24, 0.9); color: black;">
+            <i class="bi bi-star-fill"></i> Refresh Ratings
+        </button>
         <button onclick="populateLogos()" class="btn-new-movie" style="background: rgba(59, 130, 246, 0.9);">
             <i class="bi bi-upload"></i> Populate Logos
         </button>
@@ -379,6 +382,36 @@
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-upload"></i> Populate Logos';
+        }
+    }
+
+    async function populateRatings() {
+        const btn = event.target.closest('button');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> A buscar notas...';
+
+        try {
+            const response = await fetch('/Admin/PopulateRatings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(`Notas do IMDb atualizadas! ${result.updated} de ${result.total} filmes foram atualizados.`);
+                location.reload();
+            } else {
+                alert('Erro: ' + result.error);
+            }
+        } catch (error) {
+            alert('Erro: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-star-fill"></i> Refresh Ratings';
         }
     }
 </script>

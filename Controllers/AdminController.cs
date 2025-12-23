@@ -349,6 +349,52 @@ namespace CinemaRocha.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> PopulateRatings()
+        {
+            try
+            {
+                var movies = await _context.Movies.ToListAsync();
+                int updated = 0;
+
+                foreach (var movie in movies)
+                {
+                    try
+                    {
+                        // Search to get TMDB ID
+                        var searchResults = await _tmdbService.SearchMoviesAsync(movie.Title);
+                        var tmdbMovie = searchResults.FirstOrDefault();
+                        
+                        if (tmdbMovie != null)
+                        {
+                            // Get details (which now includes IMDb rating)
+                            var details = await _tmdbService.GetMovieDetailsAsync(tmdbMovie.Id);
+                            if (details != null && !string.IsNullOrEmpty(details.ImdbRating))
+                            {
+                                movie.ImdbRating = details.ImdbRating;
+                                updated++;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+
+                if (updated > 0)
+                {
+                    await _context.SaveChangesAsync();
+                }
+
+                return Json(new { success = true, updated = updated, total = movies.Count });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = ex.Message });
+            }
+        }
+
 
         // --- Sessions Management ---
 

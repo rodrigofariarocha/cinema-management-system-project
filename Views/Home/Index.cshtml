@@ -43,7 +43,7 @@
                             
                             <!-- Badges -->
                             <div class="badges">
-                                <span class="badge"><i class="bi bi-star-fill"></i> @(string.IsNullOrEmpty(movie.ImdbRating) ? "7.5" : movie.ImdbRating)/10</span>
+                                <span class="badge"><i class="bi bi-star-fill"></i> @(string.IsNullOrEmpty(movie.ImdbRating) ? "---" : movie.ImdbRating)/10</span>
                                 <span class="badge">@movie.ReleaseDate.Year</span>
                                 <span class="badge">@movie.Genre?.Split(',')[0].Trim()</span>
                             </div>
@@ -354,7 +354,7 @@
                     <img src="@movie.ImageUrl" alt="@movie.Title Poster">
                     <div class="imdb-badge">
                         <span class="imdb-logo">IMDb</span>
-                        <span class="imdb-rating">★ @(string.IsNullOrEmpty(movie.ImdbRating) ? "7.5" : movie.ImdbRating)</span>
+                        <span class="imdb-rating">★ @(string.IsNullOrEmpty(movie.ImdbRating) ? "---" : movie.ImdbRating)</span>
                     </div>
                 </div>
                 <div class="movie-info">
@@ -363,7 +363,7 @@
                     <div class="movie-meta-row">
                         <div class="meta-item">
                             <i class="bi bi-star-fill"></i>
-                            <span>@(string.IsNullOrEmpty(movie.ImdbRating) ? "7.5" : movie.ImdbRating)</span>
+                            <span>@(string.IsNullOrEmpty(movie.ImdbRating) ? "---" : movie.ImdbRating)</span>
                         </div>
                         <div class="meta-item">
                             <i class="bi bi-clock"></i>
