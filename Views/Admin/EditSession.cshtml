@@ -1,0 +1,293 @@
+@model CinemaRocha.Models.Session
+
+@{
+    ViewData["Title"] = "Editar Sessão";
+    Layout = "_AdminLayout";
+}
+
+<style>
+    .session-edit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+
+    .session-edit-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--c-text);
+    }
+
+    .session-edit-header p {
+        color: var(--c-text-muted);
+        margin: 4px 0 0 0;
+    }
+
+    .session-form-container {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 32px;
+    }
+
+    .session-main-form {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+    }
+
+    .session-sidebar {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        height: fit-content;
+        position: sticky;
+        top: 24px;
+    }
+
+    .sidebar-title {
+        font-weight: 700;
+        font-size: 1.125rem;
+        margin-bottom: 16px;
+        color: var(--c-text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sidebar-info {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
+    .sidebar-info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--c-text-muted);
+        margin-bottom: 6px;
+    }
+
+    .sidebar-info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--c-text);
+    }
+
+    .form-group-edit {
+        margin-bottom: 24px;
+    }
+
+    .form-label-edit {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--c-text);
+        font-size: 0.938rem;
+    }
+
+    .form-control-edit, .form-select-edit {
+        width: 100%;
+        padding: 14px 18px;
+        background: rgba(11, 11, 11, 0.6);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-md);
+        color: var(--c-text);
+        font-size: 1rem;
+        transition: all 0.25s ease;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .form-select-edit {
+        cursor: pointer;
+        padding-right: 42px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='rgba(255,255,255,0.5)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 16px;
+    }
+
+    .form-select-edit:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        background-color: rgba(11, 11, 11, 0.7);
+    }
+
+    .form-select-edit option {
+        background: #1a1a1a;
+        color: var(--c-text);
+        padding: 12px;
+    }
+
+    .form-select-edit option:hover,
+    .form-select-edit option:checked {
+        background: var(--c-primary);
+        color: white;
+    }
+
+    .form-control-edit:focus, .form-select-edit:focus {
+        outline: none;
+        border-color: var(--c-primary);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        background: rgba(11, 11, 11, 0.8);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-action {
+        flex: 1;
+        padding: 14px 24px;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-cancel-edit {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--c-text);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-cancel-edit:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        color: var(--c-text);
+    }
+
+    .btn-save-edit {
+        background: var(--c-primary);
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        letter-spacing: 0.3px;
+    }
+
+    .btn-save-edit:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(239, 68, 68, 0.35);
+    }
+
+    @@media (max-width: 992px) {
+        .session-form-container {
+            grid-template-columns: 1fr;
+        }
+
+        .session-sidebar {
+            position: static;
+        }
+    }
+</style>
+
+<div class="session-edit-header">
+    <div>
+        <h1>Editar Sessão</h1>
+        <p>Atualizar as informações da sessão de cinema</p>
+    </div>
+</div>
+
+<div class="session-form-container">
+    <div class="session-main-form">
+        <form asp-action="EditSession" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="form-group-edit">
+                <label asp-for="MovieId" class="form-label-edit">Filme</label>
+                <select asp-for="MovieId" class="form-select-edit" asp-items="ViewBag.MovieId"></select>
+                <span asp-validation-for="MovieId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-edit">
+                <label asp-for="RoomId" class="form-label-edit">Sala</label>
+                <select asp-for="RoomId" class="form-select-edit" asp-items="ViewBag.RoomId"></select>
+                <span asp-validation-for="RoomId" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="form-group-edit">
+                        <label asp-for="StartTime" class="form-label-edit">Data e Hora de Início</label>
+                        <input asp-for="StartTime" class="form-control-edit" type="datetime-local" />
+                        <span asp-validation-for="StartTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-5">
+                    <div class="form-group-edit">
+                        <label asp-for="Price" class="form-label-edit">Preço do Bilhete</label>
+                        <input asp-for="Price" class="form-control-edit" type="number" step="0.01" min="0" placeholder="0,00 €" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a asp-action="Sessions" class="btn-action btn-cancel-edit">Cancelar</a>
+                <button type="submit" class="btn-action btn-save-edit">Guardar Alterações</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="session-sidebar">
+        <div class="sidebar-title">
+            <i class="bi bi-info-circle"></i> Resumo
+        </div>
+        
+        <div class="sidebar-info">
+            <div class="sidebar-info-label">ID da Sessão</div>
+            <div class="sidebar-info-value">#@Model.Id</div>
+        </div>
+
+        <div class="sidebar-info">
+            <div class="sidebar-info-label">Estado</div>
+            <div class="sidebar-info-value">
+                @if (Model.StartTime > DateTime.Now)
+                {
+                    <span style="color: #22c55e;">
+                        <i class="bi bi-check-circle"></i> Agendada
+                    </span>
+                }
+                else
+                {
+                    <span style="color: #94a3b8;">
+                        <i class="bi bi-clock-history"></i> Passada
+                    </span>
+                }
+            </div>
+        </div>
+
+        <div class="sidebar-info">
+            <div class="sidebar-info-label">Última Atualização</div>
+            <div class="sidebar-info-value" style="font-size: 0.875rem;">
+                @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

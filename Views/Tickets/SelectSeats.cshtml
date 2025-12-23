@@ -1,0 +1,732 @@
+@model CinemaRocha.Models.Session
+
+@{
+    ViewData["Title"] = "Select Seats";
+    var reservedSeatIds = Model.Reservations.SelectMany(r => r.Seats).Select(s => s.Id).ToList();
+    var rowGroups = Model.Room.Seats.GroupBy(s => s.Row).OrderBy(g => g.Key).ToList();
+    var seatsPerRow = rowGroups.FirstOrDefault()?.Count() ?? 10;
+    var hasAisle = seatsPerRow >= 12; // Add center aisle for rooms with 12+ seats per row
+}
+
+<div class="cinema-theatre-container">
+    <!-- Header -->
+    <div class="theatre-header">
+        <div class="movie-info">
+            <h1 class="movie-title">@Model.Movie.Title</h1>
+            <div class="session-details">
+                <span class="detail-item">
+                    <i class="bi bi-calendar3"></i>
+                    @Model.StartTime.ToString("dd MMM yyyy")
+                </span>
+                <span class="detail-item">
+                    <i class="bi bi-clock"></i>
+                    @Model.StartTime.ToString("HH:mm")
+                </span>
+                <span class="detail-item">
+                    <i class="bi bi-door-open"></i>
+                    @Model.Room.Name
+                </span>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Room.Features))
+            {
+                <div class="room-features">
+                    @foreach (var feature in Model.Room.Features.Split(',').Select(f => f.Trim()))
+                    {
+                        <span class="feature-badge">@feature</span>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Screen -->
+    <div class="screen-zone">
+        <div class="screen-glow"></div>
+        <div class="cinema-screen">
+            <span>ECRÃ</span>
+        </div>
+    </div>
+
+    <!-- Seating Area -->
+    <form asp-action="Book" method="post" id="bookingForm">
+        <input type="hidden" name="sessionId" value="@Model.Id" />
+        <input type="hidden" name="selectedSeats" id="selectedSeatsInput" />
+
+        <div class="seating-area">
+            @foreach (var rowGroup in rowGroups)
+            {
+                var seatsInRow = rowGroup.OrderBy(s => s.Number).ToList();
+                <div class="seat-row">
+                    <span class="row-label row-label-left">@rowGroup.Key</span>
+                    
+                    <div class="seats-wrapper">
+                        @if (hasAisle)
+                        {
+                            var half = seatsInRow.Count / 2;
+                            // Left section
+                            <div class="seat-section">
+                                @for (int i = 0; i < half; i++)
+                                {
+                                    var seat = seatsInRow[i];
+                                    var isReserved = reservedSeatIds.Contains(seat.Id);
+                                    <div class="cinema-seat @(isReserved ? "occupied" : "")" 
+                                         data-id="@seat.Id" 
+                                         data-row="@seat.Row"
+                                         data-number="@seat.Number"
+                                         onclick="toggleSeat(this)">
+                                        <div class="seat-number">@seat.Number</div>
+                                    </div>
+                                }
+                            </div>
+                            
+                            <!-- Center Aisle -->
+                            <div class="center-aisle"></div>
+                            
+                            <!-- Right section -->
+                            <div class="seat-section">
+                                @for (int i = half; i < seatsInRow.Count; i++)
+                                {
+                                    var seat = seatsInRow[i];
+                                    var isReserved = reservedSeatIds.Contains(seat.Id);
+                                    <div class="cinema-seat @(isReserved ? "occupied" : "")" 
+                                         data-id="@seat.Id"
+                                         data-row="@seat.Row"
+                                         data-number="@seat.Number" 
+                                         onclick="toggleSeat(this)">
+                                        <div class="seat-number">@seat.Number</div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            // No aisle for smaller rooms
+                            <div class="seat-section seat-section-full">
+                                @foreach (var seat in seatsInRow)
+                                {
+                                    var isReserved = reservedSeatIds.Contains(seat.Id);
+                                    <div class="cinema-seat @(isReserved ? "occupied" : "")" 
+                                         data-id="@seat.Id"
+                                         data-row="@seat.Row"
+                                         data-number="@seat.Number" 
+                                         onclick="toggleSeat(this)">
+                                        <div class="seat-number">@seat.Number</div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                    
+                    <span class="row-label row-label-right">@rowGroup.Key</span>
+                </div>
+            }
+        </div>
+
+        <!-- Legend & Booking Summary -->
+        <div class="theatre-footer">
+            <div class="seat-legend">
+                <div class="legend-item">
+                    <div class="cinema-seat legend-seat"><div class="seat-number">1</div></div>
+                    <span>Disponível</span>
+                </div>
+                <div class="legend-item">
+                    <div class="cinema-seat legend-seat selected"><div class="seat-number">2</div></div>
+                    <span>Selecionado</span>
+                </div>
+                <div class="legend-item">
+                    <div class="cinema-seat legend-seat occupied"><div class="seat-number">3</div></div>
+                    <span>Ocupado</span>
+                </div>
+            </div>
+            
+            <!-- Coupon Section -->
+            <div class="coupon-section">
+                <div class="coupon-input-wrapper">
+                    <i class="bi bi-ticket-perforated-fill"></i>
+                    <input type="text" id="couponCodeInput" placeholder="Código promocional" class="coupon-input" />
+                    <button type="button" id="applyCouponBtn" class="btn-apply-coupon" onclick="applyCoupon()">
+                        Aplicar
+                    </button>
+                </div>
+                <div id="couponMessage" class="coupon-message"></div>
+            </div>
+
+            <div class="booking-panel">
+                <div class="booking-info">
+                    <div class="selected-seats-info">
+                        <span class="info-label">Lugares Selecionados:</span>
+                        <span id="selectedCount" class="info-value">0</span>
+                    </div>
+                    <div class="price-info">
+                        <span class="info-label">Total:</span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span id="totalPrice" class="info-value price-value">0.00 €</span>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="couponCode" id="couponCodeHidden" value="" />
+                <button type="submit" class="btn-book" id="btnBook" disabled>
+                    <i class="bi bi-ticket-perforated"></i>
+                    Confirmar Reserva
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .cinema-theatre-container {
+        min-height: 100vh;
+        background: linear-gradient(to bottom, var(--c-bg-main), var(--c-bg-surface));
+        padding: 40px 20px;
+    }
+
+    /* Header */
+    .theatre-header {
+        max-width: 1200px;
+        margin: 0 auto 60px;
+        text-align: center;
+    }
+
+    .movie-title {
+        font-size: 3rem;
+        font-weight: 900;
+        margin-bottom: 20px;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .session-details {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--c-text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .detail-item i {
+        color: var(--c-primary);
+        font-size: 1.2rem;
+    }
+
+    .room-features {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+    }
+
+    .feature-badge {
+        background: rgba(255, 59, 48, 0.15);
+        border: 1px solid rgba(255, 59, 48, 0.3);
+        color: var(--c-primary);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Screen */
+    .screen-zone {
+        max-width: 1200px;
+        margin: 0 auto 80px;
+        position: relative;
+    }
+
+    .screen-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        height: 100px;
+        background: radial-gradient(ellipse, rgba(255, 255, 255, 0.1), transparent);
+        filter: blur(40px);
+        pointer-events: none;
+    }
+
+    .cinema-screen {
+        height: 100px;
+        width: 85%;
+        margin: 0 auto;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+        border: 3px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px 12px 0 0;
+        transform: perspective(800px) rotateX(-25deg);
+        box-shadow: 
+            0 20px 60px rgba(255, 255, 255, 0.08),
+            inset 0 -2px 10px rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cinema-screen span {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: 12px;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Seating Area */
+    .seating-area {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .seat-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 12px;
+    }
+
+    .row-label {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--c-text-muted);
+        min-width: 30px;
+        text-align: center;
+    }
+
+    .seats-wrapper {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .seat-section {
+        display: flex;
+        gap: 8px;
+    }
+
+    .seat-section-full {
+        gap: 8px;
+    }
+
+    .center-aisle {
+        width: 40px;
+        height: 1px;
+    }
+
+    /* Cinema Seats */
+    .cinema-seat {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+        border: 2px solid #333;
+        border-radius: 8px 8px 2px 2px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .cinema-seat::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 8px 8px 2px 2px;
+        background: var(--gradient-primary);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .seat-number {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.4);
+        position: relative;
+        z-index: 1;
+        transition: color 0.3s ease;
+    }
+
+    .cinema-seat:hover:not(.occupied) {
+        background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+        border-color: var(--c-primary);
+        transform: translateY(-4px) scale(1.1);
+        box-shadow: 0 6px 20px rgba(255, 59, 48, 0.4);
+    }
+
+    .cinema-seat:hover:not(.occupied) .seat-number {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .cinema-seat.selected {
+        background: var(--gradient-primary);
+        border-color: var(--c-primary);
+        box-shadow: 0 0 20px rgba(255, 59, 48, 0.6);
+        animation: seatPulse 2s ease-in-out infinite;
+    }
+
+    .cinema-seat.selected .seat-number {
+        color: white;
+        font-weight: 700;
+    }
+
+    .cinema-seat.occupied {
+        background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+        border-color: #222;
+        cursor: not-allowed;
+        opacity: 0.4;
+    }
+
+    .cinema-seat.occupied .seat-number {
+        color: rgba(255, 255, 255, 0.2);
+    }
+
+    @@keyframes seatPulse {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(255, 59, 48, 0.6);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(255, 59, 48, 0.8);
+        }
+    }
+
+    /* Legend */
+    .theatre-footer {
+        max-width: 1200px;
+        margin: 60px auto 0;
+        padding: 40px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-xl);
+    }
+
+    .seat-legend {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .legend-item span {
+        color: var(--c-text-secondary);
+        font-weight: 500;
+    }
+
+    .legend-seat {
+        width: 36px;
+        height: 36px;
+        pointer-events: none;
+    }
+
+    /* Booking Panel */
+    .booking-panel {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 32px;
+        padding-top: 32px;
+        border-top: 1px solid var(--c-border);
+        flex-wrap: wrap;
+    }
+
+    .booking-info {
+        display: flex;
+        gap: 48px;
+        flex-wrap: wrap;
+    }
+
+    .selected-seats-info,
+    .price-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .info-label {
+        font-size: 0.9rem;
+        color: var(--c-text-muted);
+    }
+
+    .info-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--c-text-primary);
+    }
+
+    .price-value {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .btn-book {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 16px 48px;
+        border-radius: var(--radius-lg);
+        border: none;
+        font-size: 1.1rem;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(255, 59, 48, 0.3);
+    }
+
+    .btn-book:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(255, 59, 48, 0.5);
+    }
+
+    .btn-book:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Coupon Section */
+    .coupon-section {
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--c-border);
+    }
+
+    .coupon-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 2px solid var(--c-border);
+        border-radius: var(--radius-lg);
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+    }
+
+    .coupon-input-wrapper:focus-within {
+        border-color: var(--c-primary);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .coupon-input-wrapper i {
+        color: var(--c-text-muted);
+        font-size: 1.2rem;
+    }
+
+    .coupon-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--c-text-primary);
+        font-size: 1rem;
+        font-family: 'Outfit', sans-serif;
+        outline: none;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .coupon-input::placeholder {
+        color: var(--c-text-muted);
+        text-transform: none;
+        letter-spacing: normal;
+    }
+
+    .btn-apply-coupon {
+        background: transparent;
+        border: 2px solid var(--c-primary);
+        color: var(--c-primary);
+        padding: 10px 20px;
+        border-radius: var(--radius-md);
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: 'Outfit', sans-serif;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-apply-coupon:hover {
+        background: var(--c-primary);
+        color: white;
+    }
+
+    .coupon-message {
+        margin-top: 12px;
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        font-size: 0.95rem;
+        font-weight: 600;
+        display: none;
+    }
+
+    .coupon-message.success {
+        display: block;
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        color: #10b981;
+    }
+
+    .coupon-message.error {
+        display: block;
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #ef4444;
+    }
+
+    .free-badge {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        animation: badgePulse 2s ease-in-out infinite;
+        white-space: nowrap;
+    }
+
+    @@keyframes badgePulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .movie-title {
+            font-size: 2rem;
+        }
+
+        .cinema-seat {
+            width: 32px;
+            height: 32px;
+        }
+
+        .seat-number {
+            font-size: 0.6rem;
+        }
+
+        .booking-panel {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-book {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<script>
+    const pricePerSeat = @Model.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+    const selectedSeats = new Set();
+    let isFreeTicket = false;
+
+    function toggleSeat(element) {
+        if (element.classList.contains('occupied')) return;
+
+        const id = element.getAttribute('data-id');
+
+        if (selectedSeats.has(id)) {
+            selectedSeats.delete(id);
+            element.classList.remove('selected');
+        } else {
+            selectedSeats.add(id);
+            element.classList.add('selected');
+        }
+
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const count = selectedSeats.size;
+        let total = count * pricePerSeat;
+        
+        // If coupon applied: 1 seat is free, pay for the rest
+        if (isFreeTicket && count > 0) {
+            total = (count - 1) * pricePerSeat;
+        }
+        
+        document.getElementById('selectedCount').innerText = count;
+        document.getElementById('totalPrice').innerText = total.toFixed(2) + ' €';
+        document.getElementById('selectedSeatsInput').value = Array.from(selectedSeats).join(',');
+        document.getElementById('btnBook').disabled = count === 0;
+    }
+
+    async function applyCoupon() {
+        const codeInput = document.getElementById('couponCodeInput');
+        const code = codeInput.value.trim();
+        const messageEl = document.getElementById('couponMessage');
+        const priceEl = document.getElementById('totalPrice');
+        
+        if (!code) {
+            messageEl.className = 'coupon-message error';
+            messageEl.innerText = 'Insere um código';
+            return;
+        }
+        
+        try {
+            const response = await fetch('/Tickets/ValidateCoupon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: code })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                messageEl.className = 'coupon-message success';
+                messageEl.innerText = result.message;
+                
+                if (result.isFree) {
+                    isFreeTicket = true;
+                    document.getElementById('couponCodeHidden').value = code;
+                    
+                    // Add free badge
+                    if (!document.querySelector('.free-badge')) {
+                        const freeBadge = document.createElement('span');
+                        freeBadge.className = 'free-badge';
+                        freeBadge.innerText = '1 GRÁTIS!';
+                        document.getElementById('totalPrice').parentElement.appendChild(freeBadge);
+                    }
+                    
+                    // Disable input
+                    codeInput.disabled = true;
+                    document.getElementById('applyCouponBtn').disabled = true;
+                    
+                    updateSummary();
+                }
+            } else {
+                messageEl.className = 'coupon-message error';
+                messageEl.innerText = result.message;
+            }
+        } catch (error) {
+            messageEl.className = 'coupon-message error';
+            messageEl.innerText = 'Erro ao validar código';
+        }
+    }
+</script>
+

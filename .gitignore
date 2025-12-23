@@ -1,0 +1,16 @@
+# ASP.NET Core
+bin/
+obj/
+appsettings.Development.json
+app.db
+app.db-shm
+app.db-wal
+*.user
+
+# SQL scripts causing OneDrive issues
+*.sql
+
+# User-specific
+.vs/
+.idea/
+.vscode/

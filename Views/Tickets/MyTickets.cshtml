@@ -1,0 +1,608 @@
+@model IEnumerable<CinemaRocha.Models.Reservation>
+
+@{
+    ViewData["Title"] = "Meus Bilhetes";
+}
+
+<div class="my-tickets-container">
+    <div class="tickets-header">
+        <div class="header-content">
+            <div>
+                <h1 class="page-title">Meus Bilhetes</h1>
+                <p class="page-subtitle">Gerir as tuas reservas e bilhetes digitais</p>
+            </div>
+            
+            @if (Model.Any())
+            {
+                var validCount = Model.Count(r => r.Session.StartTime > DateTime.Now);
+                var expiredCount = Model.Count(r => r.Session.StartTime <= DateTime.Now);
+                
+                <div class="filter-section">
+                    <label for="ticketFilter" class="filter-label">
+                        <i class="bi bi-funnel"></i>
+                        Filtrar:
+                    </label>
+                    <select id="ticketFilter" class="ticket-filter-dropdown">
+                        <option value="all">Todos os Bilhetes (@Model.Count())</option>
+                        <option value="valid">Disponíveis (@validCount)</option>
+                        <option value="expired">Expirados (@expiredCount)</option>
+                    </select>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-tickets-state">
+            <div class="empty-icon-wrapper">
+                <div class="empty-icon">
+                    <i class="bi bi-ticket-perforated"></i>
+                </div>
+            </div>
+            <h2 class="empty-title">Ainda não tens bilhetes</h2>
+            <p class="empty-description">Explora os nossos filmes em exibição e reserva os teus lugares para uma experiência incrível!</p>
+            <a asp-controller="Home" asp-action="Index" class="btn-explore">
+                <i class="bi bi-film"></i>
+                Explorar Filmes
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="tickets-grid" id="ticketsGrid">
+            @foreach (var item in Model.OrderByDescending(r => r.Session.StartTime))
+            {
+                var isValid = item.Session.StartTime > DateTime.Now;
+                
+                <div class="ticket-item" data-status="@(isValid ? "valid" : "expired")">
+                    <div class="premium-ticket-card">
+                        <!-- Movie Poster Thumbnail -->
+                        <div class="ticket-poster">
+                            <img src="@item.Session.Movie.ImageUrl" alt="@item.Session.Movie.Title">
+                            <div class="poster-gradient"></div>
+                            @if (!isValid)
+                            {
+                                <div class="expired-overlay">
+                                    <i class="bi bi-x-circle"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Ticket Content -->
+                        <div class="ticket-content">
+                            <!-- Status Badge -->
+                            <div class="ticket-header-row">
+                                <span class="status-badge @(isValid ? "status-valid" : "status-expired")">
+                                    <i class="bi bi-@(isValid ? "check-circle-fill" : "clock-history")"></i>
+                                    @(isValid ? "Válido" : "Expirado")
+                                </span>
+                            </div>
+
+                            <!-- Movie Info -->
+                            <h3 class="ticket-movie-title">@item.Session.Movie.Title</h3>
+                            <div class="ticket-room">
+                                <i class="bi bi-door-open"></i>
+                                <span>@item.Session.Room.Name</span>
+                            </div>
+
+                            <!-- Session Details -->
+                            <div class="ticket-session-grid">
+                                <div class="session-detail">
+                                    <span class="detail-label">Data</span>
+                                    <span class="detail-value">@item.Session.StartTime.ToString("dd MMM yyyy")</span>
+                                </div>
+                                <div class="session-detail">
+                                    <span class="detail-label">Hora</span>
+                                    <span class="detail-value time-value">@item.Session.StartTime.ToString("HH:mm")</span>
+                                </div>
+                                <div class="session-detail">
+                                    <span class="detail-label">Bilhetes</span>
+                                    <span class="detail-value">@item.Seats.Count</span>
+                                </div>
+                            </div>
+
+                            <!-- Seats Section -->
+                            <div class="ticket-seats-section">
+                                <span class="seats-label">
+                                    <i class="bi bi-geo-alt"></i>
+                                    Lugares Reservados
+                                </span>
+                                <div class="seats-list">
+                                    @foreach (var seat in item.Seats)
+                                    {
+                                        <div class="mini-seat-badge">
+                                            @seat.Row@seat.Number
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- View Ticket Button -->
+                            <a asp-action="Confirmation" asp-route-id="@item.Id" class="btn-view-ticket">
+                                <i class="bi bi-qr-code-scan"></i>
+                                Ver Bilhete Digital
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <!-- Empty State Message (Hidden by default, shown when filter has no results) -->
+        <div id="noTicketsMessage" class="empty-tickets-state" style="display: none; margin-top: 40px;">
+            <div class="empty-icon-wrapper">
+                <div class="empty-icon">
+                    <i class="bi bi-ticket-perforated"></i>
+                </div>
+            </div>
+            <h2 class="empty-title">Nenhum bilhete encontrado</h2>
+            <p class="empty-description">Não existem bilhetes nesta categoria.</p>
+        </div>
+    }
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterDropdown = document.getElementById('ticketFilter');
+    const ticketsGrid = document.getElementById('ticketsGrid');
+    const ticketItems = document.querySelectorAll('.ticket-item');
+    const noTicketsMessage = document.getElementById('noTicketsMessage');
+    
+    if (filterDropdown && ticketItems.length > 0) {
+        // Add focus/blur effects
+        filterDropdown.addEventListener('focus', function() {
+            this.style.borderColor = 'var(--c-primary)';
+            this.style.boxShadow = '0 0 0 3px rgba(255, 59, 48, 0.1)';
+        });
+        
+        filterDropdown.addEventListener('blur', function() {
+            this.style.borderColor = 'var(--c-border)';
+            this.style.boxShadow = 'none';
+        });
+        
+        // Filter tickets based on selection
+        filterDropdown.addEventListener('change', function() {
+            const selectedFilter = this.value;
+            let visibleCount = 0;
+            
+            ticketItems.forEach(function(item) {
+                const status = item.getAttribute('data-status');
+                
+                if (selectedFilter === 'all' || 
+                    (selectedFilter === 'valid' && status === 'valid') ||
+                    (selectedFilter === 'expired' && status === 'expired')) {
+                    item.style.display = 'block';
+                    item.style.animation = 'fadeInUp 0.4s ease-out';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Show/hide empty message
+            if (visibleCount === 0) {
+                if (ticketsGrid) ticketsGrid.style.display = 'none';
+                if (noTicketsMessage) noTicketsMessage.style.display = 'block';
+            } else {
+                if (ticketsGrid) ticketsGrid.style.display = 'grid';
+                if (noTicketsMessage) noTicketsMessage.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+
+<style>
+    .my-tickets-container {
+        min-height: 100vh;
+        background: linear-gradient(to bottom, var(--c-bg-main), var(--c-bg-surface));
+        padding: 60px 20px 100px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    /* Header */
+    .tickets-header {
+        max-width: 1200px;
+        margin: 0 auto 60px;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 32px;
+        flex-wrap: wrap;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 900;
+        margin-bottom: 16px;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: var(--c-text-secondary);
+    }
+
+    /* Filter Section */
+    .filter-section {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .filter-label {
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--c-text-secondary);
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .ticket-filter-dropdown {
+        font-family: 'Outfit', sans-serif;
+        background: var(--c-bg-surface);
+        border: 2px solid var(--c-border);
+        color: var(--c-text-primary);
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        min-width: 220px;
+        transition: all 0.3s ease;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23FF3B30' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        padding-right: 45px;
+    }
+
+    .ticket-filter-dropdown:hover {
+        border-color: var(--c-border-light);
+    }
+
+    .ticket-filter-dropdown option {
+        background: var(--c-bg-surface);
+        color: var(--c-text-primary);
+        padding: 12px;
+    }
+
+    /* Empty State */
+    .empty-tickets-state {
+        max-width: 600px;
+        margin: 80px auto;
+        text-align: center;
+        padding: 80px 40px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-xl);
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .empty-icon-wrapper {
+        margin-bottom: 32px;
+    }
+
+    .empty-icon {
+        display: inline-block;
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, rgba(255, 59, 48, 0.1), rgba(255, 59, 48, 0.05));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .empty-icon i {
+        font-size: 4rem;
+        color: var(--c-primary);
+        opacity: 0.5;
+    }
+
+    .empty-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 16px;
+        color: var(--c-text-primary);
+    }
+
+    .empty-description {
+        font-size: 1.1rem;
+        color: var(--c-text-secondary);
+        margin-bottom: 32px;
+        line-height: 1.6;
+    }
+
+    .btn-explore {
+        font-family: 'Outfit', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--gradient-primary);
+        color: white;
+        padding: 16px 48px;
+        border-radius: var(--radius-lg);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(255, 59, 48, 0.3);
+    }
+
+    .btn-explore:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(255, 59, 48, 0.5);
+        color: white;
+    }
+
+    /* Tickets Grid */
+    .tickets-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+    }
+
+    .ticket-item {
+        animation: fadeInUp 0.6s ease-out both;
+    }
+
+    .ticket-item:nth-child(2) { animation-delay: 0.1s; }
+    .ticket-item:nth-child(3) { animation-delay: 0.2s; }
+    .ticket-item:nth-child(4) { animation-delay: 0.3s; }
+
+    /* Premium Ticket Card */
+    .premium-ticket-card {
+        background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(18, 18, 18, 0.98) 100%);
+        backdrop-filter: blur(24px);
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 
+                    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    }
+
+    /* ... (skipped unchanged parts) ... */
+
+    /* Poster Thumbnail */
+    .ticket-poster {
+        position: relative;
+        height: 140px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(0, 0, 0, 0.4));
+    }
+
+    /* ... */
+
+    /* Ticket Content */
+    .ticket-content {
+        padding: 16px;
+    }
+
+    .ticket-header-row {
+        margin-bottom: 12px;
+    }
+
+    .status-badge {
+        font-family: 'Outfit', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* ... */
+
+    .ticket-movie-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        color: var(--c-text-primary);
+        line-height: 1.3;
+        letter-spacing: -0.5px;
+    }
+
+    .ticket-room {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--c-text-secondary);
+        margin-bottom: 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    /* Session Grid */
+    .ticket-session-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .session-detail {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .detail-label {
+        font-size: 0.6rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .detail-value {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: var(--c-text-primary);
+    }
+
+    .time-value {
+        color: var(--c-primary);
+        font-size: 1.1rem;
+    }
+
+    .status-valid {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+        border: 1.5px solid rgba(16, 185, 129, 0.5);
+        color: #34d399;
+    }
+
+    .status-expired {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+        border: 1.5px solid rgba(239, 68, 68, 0.4);
+        color: #ef4444;
+    }
+
+    /* Seats Section */
+    .ticket-seats-section {
+        margin-bottom: 16px;
+    }
+
+    .seats-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.6rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 8px;
+    }
+
+    .seats-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .mini-seat-badge {
+        font-family: 'Outfit', sans-serif;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
+        border: 2px solid rgba(239, 68, 68, 0.4);
+        color: #ef4444;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 0.75rem;
+        min-width: 40px;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+    }
+
+    /* ... */
+
+    /* View Ticket Button */
+    .btn-view-ticket {
+        font-family: 'Outfit', sans-serif;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.08));
+        border: 2px solid rgba(239, 68, 68, 0.3);
+        color: #ef4444;
+        padding: 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-view-ticket::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-view-ticket:hover::before {
+        left: 100%;
+    }
+
+    .btn-view-ticket:hover {
+        border-color: rgba(239, 68, 68, 0.6);
+        color: #ff5555;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.12));
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-view-ticket i {
+        font-size: 1.1rem;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .tickets-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .ticket-session-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .empty-tickets-state {
+            padding: 60px 32px;
+            margin: 40px 20px;
+        }
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

@@ -1,0 +1,223 @@
+@model CinemaRocha.Models.Room
+
+@{
+    ViewData["Title"] = "Nova Sala";
+    Layout = "_AdminLayout";
+}
+
+<style>
+    .room-create-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+
+    .room-create-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--c-text);
+    }
+
+    .room-create-header p {
+        color: var(--c-text-muted);
+        margin: 4px 0 0 0;
+    }
+
+    .room-create-container {
+        max-width: 600px;
+    }
+
+    .room-main-form {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+    }
+
+    .form-group-create {
+        margin-bottom: 24px;
+    }
+
+    .form-label-create {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--c-text);
+        font-size: 0.938rem;
+    }
+
+    .form-control-create {
+        width: 100%;
+        padding: 14px 18px;
+        background: rgba(11, 11, 11, 0.6);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-md);
+        color: var(--c-text);
+        font-size: 1rem;
+        transition: all 0.25s ease;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .form-control-create:focus {
+        outline: none;
+        border-color: var(--c-primary);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        background: rgba(11, 11, 11, 0.8);
+    }
+
+    .form-hint {
+        margin-top: 8px;
+        font-size: 0.813rem;
+        color: var(--c-text-muted);
+        opacity: 0.8;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: var(--radius-sm);
+        border-left: 2px solid rgba(59, 130, 246, 0.4);
+    }
+
+    .form-hint i {
+        color: #60a5fa;
+        font-size: 0.875rem;
+    }
+
+    .form-actions-create {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-action-create {
+        flex: 1;
+        padding: 14px 24px;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-cancel-create {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--c-text);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-cancel-create:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        color: var(--c-text);
+    }
+
+    .btn-create-submit {
+        background: var(--c-primary);
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        letter-spacing: 0.3px;
+        border: 2px solid var(--c-primary);
+    }
+
+    .btn-create-submit:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(239, 68, 68, 0.35);
+    }
+
+    .info-box {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .info-box i {
+        color: #60a5fa;
+        font-size: 1.25rem;
+        margin-top: 2px;
+    }
+
+    .info-box-content {
+        flex: 1;
+    }
+
+    .info-box-title {
+        font-weight: 600;
+        color: #60a5fa;
+        margin-bottom: 4px;
+        font-size: 0.938rem;
+    }
+
+    .info-box-text {
+        color: var(--c-text-muted);
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+</style>
+
+<div class="room-create-header">
+    <div>
+        <h1>Criar Nova Sala</h1>
+        <p>Adicionar uma nova sala de cinema</p>
+    </div>
+</div>
+
+<div class="room-create-container">
+    <div class="room-main-form">
+        <form asp-action="CreateRoom" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            
+            <div class="info-box">
+                <i class="bi bi-info-circle-fill"></i>
+                <div class="info-box-content">
+                    <div class="info-box-title">Geração Automática</div>
+                    <div class="info-box-text">Os lugares serão gerados automaticamente com base na capacidade definida.</div>
+                </div>
+            </div>
+
+            <div class="form-group-create">
+                <label asp-for="Name" class="form-label-create">Nome da Sala</label>
+                <input asp-for="Name" class="form-control-create" placeholder="Ex: Sala 1 (IMAX), Sala 2 (Standard)..." />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-create">
+                <label asp-for="Capacity" class="form-label-create">Capacidade</label>
+                <input asp-for="Capacity" class="form-control-create" type="number" min="10" max="500" placeholder="Digite o número de lugares" />
+                <div class="form-hint">
+                    <i class="bi bi-lightbulb"></i>
+                    <span>Recomendado: entre 20 e 200 lugares</span>
+                </div>
+                <span asp-validation-for="Capacity" class="text-danger"></span>
+            </div>
+
+            <div class="form-actions-create">
+                <a asp-action="Rooms" class="btn-action-create btn-cancel-create">Cancelar</a>
+                <button type="submit" class="btn-action-create btn-create-submit">Criar Sala</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,443 @@
+@model IEnumerable<CinemaRocha.Models.Movie>
+
+@{
+    ViewData["Title"] = "Gestão de Filmes";
+    Layout = "_AdminLayout";
+}
+
+<style>
+    .movies-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+
+    .movies-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--c-text);
+    }
+
+    .movies-header p {
+        color: var(--c-text-muted);
+        margin: 4px 0 0 0;
+    }
+
+    .movies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+        margin-top: 24px;
+        padding-top: 8px;
+    }
+
+    .movie-card-admin {
+        background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        position: relative;
+    }
+
+    .movie-card-admin::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 16px;
+        padding: 1px;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), transparent);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        pointer-events: none;
+    }
+
+    .movie-card-admin:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .movie-card-admin:hover::before {
+        opacity: 1;
+    }
+
+    .movie-poster-container {
+        width: 100%;
+        aspect-ratio: 2 / 3;
+        overflow: hidden;
+        background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+        position: relative;
+    }
+
+    .movie-poster-container::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        pointer-events: none;
+    }
+
+    .movie-card-admin:hover .movie-poster-container::after {
+        opacity: 1;
+    }
+
+    .movie-poster-admin {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+        transition: transform 0.35s ease;
+    }
+
+    .movie-card-admin:hover .movie-poster-admin {
+        transform: scale(1.05);
+    }
+
+    .movie-poster-admin.broken {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--c-text-muted);
+        font-size: 3rem;
+        opacity: 0.25;
+    }
+
+    .movie-card-content {
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .movie-title-admin {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--c-text);
+        margin-bottom: 6px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.6em;
+    }
+
+    .movie-meta-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .movie-id {
+        font-size: 0.75rem;
+        color: var(--c-text-muted);
+        opacity: 0.6;
+        font-family: monospace;
+    }
+
+    .movie-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: auto;
+        padding-bottom: 14px;
+    }
+
+    .movie-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.813rem;
+        color: var(--c-text-muted);
+    }
+
+    .movie-meta-item i {
+        font-size: 0.938rem;
+        color: var(--c-primary);
+    }
+
+    .movie-genre-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.15));
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 6px;
+        font-size: 0.688rem;
+        font-weight: 600;
+        color: var(--c-primary);
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+    }
+
+    .movie-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-action {
+        flex: 1;
+        padding: 8px;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-action i {
+        font-size: 0.875rem;
+    }
+
+    .btn-edit {
+        background: rgba(59, 130, 246, 0.1);
+        color: #60a5fa;
+    }
+
+    .btn-edit:hover {
+        background: rgba(59, 130, 246, 0.25);
+        border-color: rgba(59, 130, 246, 0.6);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+        color: #60a5fa;
+    }
+
+    .btn-delete {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+    }
+
+    .btn-delete:hover {
+        background: rgba(239, 68, 68, 0.25);
+        border-color: rgba(239, 68, 68, 0.6);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.25);
+        color: #f87171;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 120px 20px;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        opacity: 0.15;
+        margin-bottom: 24px;
+        display: block;
+        color: var(--c-text-muted);
+    }
+
+    .empty-state h3 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--c-text);
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        color: var(--c-text-muted);
+        font-size: 0.938rem;
+        opacity: 0.7;
+    }
+
+    .btn-new-movie {
+        padding: 13px 26px;
+        background: var(--c-primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s ease;
+        font-size: 0.938rem;
+    }
+
+    .btn-new-movie:hover {
+        background: #dc2626;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.35);
+        color: white;
+    }
+
+    /* Responsive Grid */
+    @@media (max-width: 1600px) {
+        .movies-grid {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        }
+    }
+
+    @@media (max-width: 1200px) {
+        .movies-grid {
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 18px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .movies-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .movie-card-content {
+            padding: 12px;
+        }
+
+        .movies-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .movies-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .movie-title-admin {
+            font-size: 0.875rem;
+        }
+
+        .btn-action {
+            font-size: 0.688rem;
+            padding: 7px 8px;
+        }
+    }
+</style>
+
+<div class="movies-header">
+    <div>
+        <h1>Filmes</h1>
+        <p>Gerir catálogo de filmes</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+        <button onclick="populateLogos()" class="btn-new-movie" style="background: rgba(59, 130, 246, 0.9);">
+            <i class="bi bi-upload"></i> Populate Logos
+        </button>
+        <a asp-action="CreateMovie" class="btn-new-movie">
+            <i class="bi bi-plus-lg"></i> Novo Filme
+        </a>
+    </div>
+</div>
+
+<script>
+    async function populateLogos() {
+        const btn = event.target.closest('button');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> A buscar logos...';
+
+        try {
+            const response = await fetch('/Admin/PopulateLogos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(`Logos atualizados com sucesso! ${result.updated} de ${result.total} filmes foram atualizados.`);
+                location.reload();
+            } else {
+                alert('Erro: ' + result.error);
+            }
+        } catch (error) {
+            alert('Erro: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-upload"></i> Populate Logos';
+        }
+    }
+</script>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <i class="bi bi-film"></i>
+        <h3>Nenhum filme encontrado</h3>
+        <p>Adicione o primeiro filme ao catálogo usando o botão acima</p>
+    </div>
+}
+else
+{
+    <div class="movies-grid">
+        @foreach (var movie in Model)
+        {
+            <div class="movie-card-admin">
+                <div class="movie-poster-container">
+                    @if (!string.IsNullOrEmpty(movie.ImageUrl))
+                    {
+                        <img src="@movie.ImageUrl" 
+                             alt="@movie.Title" 
+                             class="movie-poster-admin"
+                             onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="movie-poster-admin broken" style="display: none;">
+                            <i class="bi bi-film"></i>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="movie-poster-admin broken">
+                            <i class="bi bi-film"></i>
+                        </div>
+                    }
+                </div>
+                    <div class="movie-card-content" style="padding-top: 16px;">
+                        <div class="movie-title-admin" style="margin-bottom: 12px;">@movie.Title</div>
+                        
+                        <div class="movie-meta">
+                            <div class="movie-meta-row">
+                                <div class="movie-meta-item">
+                                    <i class="bi bi-clock"></i>
+                                    <span>@movie.Duration min</span>
+                                </div>
+                            </div>
+                            <span class="movie-genre-badge">@movie.Genre</span>
+                        </div>
+
+                    <div class="movie-actions">
+                        <a asp-action="EditMovie" asp-route-id="@movie.Id" class="btn-action btn-edit">
+                            <i class="bi bi-pencil"></i> Editar
+                        </a>
+                        <a asp-action="DeleteMovie" asp-route-id="@movie.Id" class="btn-action btn-delete">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
