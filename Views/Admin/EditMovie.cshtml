@@ -188,15 +188,20 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 form-group-clean">
+                    <div class="col-md-4 form-group-clean">
                         <label asp-for="Genre" class="form-label-clean">Género</label>
                         <input asp-for="Genre" class="form-input-clean" />
                         <span asp-validation-for="Genre" class="text-danger"></span>
                     </div>
-                    <div class="col-md-6 form-group-clean">
+                    <div class="col-md-4 form-group-clean">
                         <label asp-for="Duration" class="form-label-clean">Duração (minutos)</label>
                         <input asp-for="Duration" class="form-input-clean" type="number" />
                         <span asp-validation-for="Duration" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 form-group-clean">
+                        <label asp-for="ImdbRating" class="form-label-clean">Avaliação IMDb</label>
+                        <input asp-for="ImdbRating" class="form-input-clean" placeholder="ex: 8.5" />
+                        <span asp-validation-for="ImdbRating" class="text-danger"></span>
                     </div>
                 </div>
 

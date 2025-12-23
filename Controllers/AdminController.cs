@@ -208,7 +208,7 @@ namespace CinemaRocha.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateMovie([Bind("Id,Title,Description,Genre,Duration,ImageUrl,TrailerUrl,LogoUrl,BackdropUrl,ReleaseDate")] Movie movie)
+        public async Task<IActionResult> CreateMovie([Bind("Id,Title,Description,Genre,Duration,ImageUrl,TrailerUrl,LogoUrl,BackdropUrl,ReleaseDate,ImdbRating")] Movie movie)
         {
             if (ModelState.IsValid)
             {
@@ -230,7 +230,7 @@ namespace CinemaRocha.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditMovie(int id, [Bind("Id,Title,Description,Genre,Duration,ImageUrl,TrailerUrl,LogoUrl,BackdropUrl,ReleaseDate")] Movie movie)
+        public async Task<IActionResult> EditMovie(int id, [Bind("Id,Title,Description,Genre,Duration,ImageUrl,TrailerUrl,LogoUrl,BackdropUrl,ReleaseDate,ImdbRating")] Movie movie)
         {
             if (id != movie.Id) return NotFound();
 
@@ -297,7 +297,8 @@ namespace CinemaRocha.Controllers
                 genre = string.Join(", ", movie.Genres),
                 duration = movie.Runtime,
                 imageUrl = movie.PosterPath,
-                releaseDate = movie.ReleaseDate
+                releaseDate = movie.ReleaseDate,
+                imdbRating = movie.ImdbRating
             });
         }
 

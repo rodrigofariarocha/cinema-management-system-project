@@ -294,15 +294,20 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 form-group-clean">
+                    <div class="col-md-4 form-group-clean">
                         <label class="form-label-clean">Género</label>
                         <input asp-for="Genre" id="movieGenre" class="form-input-admin" />
                         <span asp-validation-for="Genre" class="text-danger"></span>
                     </div>
-                    <div class="col-md-6 form-group-clean">
+                    <div class="col-md-4 form-group-clean">
                         <label class="form-label-clean">Duração (minutos)</label>
                         <input asp-for="Duration" id="movieDuration" type="number" class="form-input-admin" />
                         <span asp-validation-for="Duration" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 form-group-clean">
+                        <label class="form-label-clean">Avaliação IMDb</label>
+                        <input asp-for="ImdbRating" id="movieImdbRating" class="form-input-admin" placeholder="ex: 8.5" />
+                        <span asp-validation-for="ImdbRating" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -433,6 +438,11 @@
                 document.getElementById('movieGenre').value = movie.genre;
                 document.getElementById('movieDuration').value = movie.duration;
                 document.getElementById('movieImageUrl').value = movie.imageUrl;
+                
+                // Populate ImdbRating
+                if (movie.imdbRating) {
+                    document.getElementById('movieImdbRating').value = movie.imdbRating;
+                }
                 
                 // Populate LogoUrl if field exists
                 const logoUrlField = document.getElementById('movieLogoUrl');

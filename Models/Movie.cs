@@ -40,6 +40,8 @@ namespace CinemaRocha.Models
         [DataType(DataType.Date)]
         public DateTime ReleaseDate { get; set; }
 
+        public string? ImdbRating { get; set; }
+
         // Navigation property
         public ICollection<Session> Sessions { get; set; } = new List<Session>();
     }

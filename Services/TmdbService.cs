@@ -12,6 +12,7 @@ namespace CinemaRocha.Services
         public List<TmdbGenre> Genres { get; set; } = new();
         public int Runtime { get; set; }
         public double Vote_average { get; set; }
+        public string? Imdb_id { get; set; }
     }
 
     public class TmdbGenre
@@ -47,6 +48,7 @@ namespace CinemaRocha.Services
         public double VoteAverage { get; set; }
         public List<string> Genres { get; set; } = new();
         public string? LogoPath { get; set; }
+        public string? ImdbRating { get; set; }
     }
 
     public class TmdbImages
@@ -150,6 +152,13 @@ namespace CinemaRocha.Services
                 // Fetch logo
                 var logoUrl = await GetMovieLogoAsync(tmdbId);
 
+                // Fetch IMDb rating if ID is available
+                string? imdbRating = null;
+                if (!string.IsNullOrEmpty(movie.Imdb_id))
+                {
+                    imdbRating = await GetOmdbRatingAsync(movie.Imdb_id);
+                }
+
                 return new TmdbMovieDetails
                 {
                     Id = movie.Id,
@@ -162,7 +171,8 @@ namespace CinemaRocha.Services
                         ? $"https://image.tmdb.org/t/p/original{movie.Poster_path}"
                         : null,
                     Genres = movie.Genres?.Select(g => g.Name ?? "").ToList() ?? new List<string>(),
-                    LogoPath = logoUrl
+                    LogoPath = logoUrl,
+                    ImdbRating = imdbRating
                 };
             }
             catch (Exception ex)
@@ -219,6 +229,31 @@ namespace CinemaRocha.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"TMDB Get Logo Error: {ex.Message}");
+                return null;
+            }
+        }
+
+        private async Task<string?> GetOmdbRatingAsync(string imdbId)
+        {
+            try
+            {
+                var omdbApiKey = "c0c9b551"; // Hardcoded for simplicity as per user prompt, though better via configuration
+                var url = $"http://www.omdbapi.com/?i={imdbId}&apikey={omdbApiKey}";
+                
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode) return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("imdbRating", out var rating))
+                {
+                    return rating.GetString();
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"OMDb Rating Error: {ex.Message}");
                 return null;
             }
         }
