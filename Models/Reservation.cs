@@ -21,13 +21,11 @@ namespace CinemaRocha.Models
         [DataType(DataType.DateTime)]
         public DateTime ReservationDate { get; set; }
 
-        // Link to specific seats reserved
         public ICollection<Seat> Seats { get; set; } = new List<Seat>();
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalPrice { get; set; }
 
-        // Navigation properties
         public IdentityUser User { get; set; } = null!;
         public Session Session { get; set; } = null!;
     }

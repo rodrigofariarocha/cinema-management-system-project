@@ -16,7 +16,6 @@ public class UserLoyalty
     
     public DateTime LastUpdated { get; set; } = DateTime.Now;
     
-    // Navigation
     public IdentityUser User { get; set; } = null!;
     public ICollection<UserCoupon> UserCoupons { get; set; } = new List<UserCoupon>();
 }

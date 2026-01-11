@@ -42,7 +42,6 @@ namespace CinemaRocha.Models
 
         public string? ImdbRating { get; set; }
 
-        // Navigation property
         public ICollection<Session> Sessions { get; set; } = new List<Session>();
     }
 }

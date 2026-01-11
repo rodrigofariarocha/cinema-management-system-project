@@ -25,7 +25,6 @@ public class LoyaltyController : Controller
         var user = await _userManager.GetUserAsync(User);
         var isAdmin = user?.Email?.ToLower() == "admin@cinemarocha.com";
         
-        // Get or create user loyalty
         var loyalty = await _context.UserLoyalties
             .FirstOrDefaultAsync(ul => ul.UserId == userId);
             
@@ -36,11 +35,10 @@ public class LoyaltyController : Controller
             await _context.SaveChangesAsync();
         }
         
-        // Get user's coupons (empty for admin)
         List<UserCoupon> userCoupons;
         if (isAdmin)
         {
-            userCoupons = new List<UserCoupon>(); // Admin sees no coupons
+            userCoupons = new List<UserCoupon>();
         }
         else
         {

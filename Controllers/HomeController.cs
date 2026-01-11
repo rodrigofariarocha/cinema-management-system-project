@@ -19,7 +19,6 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        // Only show movies that have at least one session in the future
         var movies = await _context.Movies
             .Include(m => m.Sessions)
             .Where(m => m.Sessions.Any(s => s.StartTime > DateTime.Now))

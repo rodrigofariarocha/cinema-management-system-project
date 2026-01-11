@@ -342,11 +342,12 @@
         <p>Gerir catálogo de filmes</p>
     </div>
     <div style="display: flex; gap: 12px;">
+        @Html.AntiForgeryToken()
         <button onclick="populateRatings()" class="btn-new-movie" style="background: rgba(245, 197, 24, 0.9); color: black;">
             <i class="bi bi-star-fill"></i> Refresh Ratings
         </button>
         <button onclick="populateLogos()" class="btn-new-movie" style="background: rgba(59, 130, 246, 0.9);">
-            <i class="bi bi-upload"></i> Populate Logos
+            <i class="bi bi-upload"></i> Refresh Logos
         </button>
         <a asp-action="CreateMovie" class="btn-new-movie">
             <i class="bi bi-plus-lg"></i> Novo Filme
@@ -381,7 +382,7 @@
             alert('Erro: ' + error.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-upload"></i> Populate Logos';
+            btn.innerHTML = '<i class="bi bi-upload"></i> Refresh Logos';
         }
     }
 
@@ -389,26 +390,40 @@
         const btn = event.target.closest('button');
         btn.disabled = true;
         btn.innerHTML = '<i class="bi bi-hourglass-split"></i> A buscar notas...';
+        console.log('Starting PopulateRatings call...');
 
         try {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            console.log('Token found:', token ? 'Yes' : 'No');
+
             const response = await fetch('/Admin/PopulateRatings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    'RequestVerificationToken': token
                 }
             });
 
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Response error body:', errorText);
+                throw new Error(`HTTP ${response.status}: ${errorText || 'Erro desconhecido'}`);
+            }
+
             const result = await response.json();
+            console.log('Result:', result);
 
             if (result.success) {
                 alert(`Notas do IMDb atualizadas! ${result.updated} de ${result.total} filmes foram atualizados.`);
                 location.reload();
             } else {
-                alert('Erro: ' + result.error);
+                alert('Erro: ' + (result.error || result.message));
             }
         } catch (error) {
-            alert('Erro: ' + error.message);
+            console.error('Fetch error:', error);
+            alert('Erro ao ligar ao servidor: ' + error.message);
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-star-fill"></i> Refresh Ratings';

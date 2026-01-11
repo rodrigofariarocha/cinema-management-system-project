@@ -49,6 +49,7 @@ namespace CinemaRocha.Services
         public List<string> Genres { get; set; } = new();
         public string? LogoPath { get; set; }
         public string? ImdbRating { get; set; }
+        public string? Imdb_id { get; set; }
     }
 
     public class TmdbImages
@@ -82,7 +83,6 @@ namespace CinemaRocha.Services
             var baseUrl = configuration["Tmdb:BaseUrl"] ?? "https://api.themoviedb.org/3";
             _httpClient.BaseAddress = new Uri(baseUrl);
             
-            // Set Bearer token if available, otherwise use API key
             if (!string.IsNullOrEmpty(_bearerToken))
             {
                 _httpClient.DefaultRequestHeaders.Authorization = 
@@ -94,7 +94,6 @@ namespace CinemaRocha.Services
         {
             try
             {
-                // Use Bearer token if available, otherwise fall back to API key
                 var url = !string.IsNullOrEmpty(_bearerToken)
                     ? $"/3/search/movie?query={Uri.EscapeDataString(query)}&language=pt-PT"
                     : $"/3/search/movie?api_key={_apiKey}&query={Uri.EscapeDataString(query)}&language=pt-PT";
@@ -108,7 +107,6 @@ namespace CinemaRocha.Services
                     PropertyNameCaseInsensitive = true 
                 });
 
-                // Convert search results to details format with proper image URLs
                 return result?.Results.Select(r => new TmdbMovieDetails
                 {
                     Id = r.Id,
@@ -123,7 +121,6 @@ namespace CinemaRocha.Services
             }
             catch (Exception ex)
             {
-                // Log error
                 Console.WriteLine($"TMDB Search Error: {ex.Message}");
                 return new List<TmdbMovieDetails>();
             }
@@ -133,7 +130,6 @@ namespace CinemaRocha.Services
         {
             try
             {
-                // Use Bearer token if available, otherwise fall back to API key
                 var url = !string.IsNullOrEmpty(_bearerToken)
                     ? $"/3/movie/{tmdbId}?language=pt-PT"
                     : $"/3/movie/{tmdbId}?api_key={_apiKey}&language=pt-PT";
@@ -149,15 +145,7 @@ namespace CinemaRocha.Services
 
                 if (movie == null) return null;
 
-                // Fetch logo
                 var logoUrl = await GetMovieLogoAsync(tmdbId);
-
-                // Fetch IMDb rating if ID is available
-                string? imdbRating = null;
-                if (!string.IsNullOrEmpty(movie.Imdb_id))
-                {
-                    imdbRating = await GetOmdbRatingAsync(movie.Imdb_id);
-                }
 
                 return new TmdbMovieDetails
                 {
@@ -172,7 +160,8 @@ namespace CinemaRocha.Services
                         : null,
                     Genres = movie.Genres?.Select(g => g.Name ?? "").ToList() ?? new List<string>(),
                     LogoPath = logoUrl,
-                    ImdbRating = imdbRating
+                    ImdbRating = movie.Vote_average.ToString("0.0"),
+                    Imdb_id = movie.Imdb_id
                 };
             }
             catch (Exception ex)
@@ -186,7 +175,6 @@ namespace CinemaRocha.Services
         {
             try
             {
-                // Fetch images for the movie
                 var url = !string.IsNullOrEmpty(_bearerToken)
                     ? $"/3/movie/{tmdbId}/images"
                     : $"/3/movie/{tmdbId}/images?api_key={_apiKey}";
@@ -203,7 +191,6 @@ namespace CinemaRocha.Services
                 if (images?.Logos == null || !images.Logos.Any())
                     return null;
 
-                // Prefer Portuguese logos, fall back to English, then any language
                 var logo = images.Logos
                     .Where(l => l.Iso_639_1 == "pt")
                     .OrderByDescending(l => l.Vote_average)
@@ -229,31 +216,6 @@ namespace CinemaRocha.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"TMDB Get Logo Error: {ex.Message}");
-                return null;
-            }
-        }
-
-        private async Task<string?> GetOmdbRatingAsync(string imdbId)
-        {
-            try
-            {
-                var omdbApiKey = "c0c9b551"; // Hardcoded for simplicity as per user prompt, though better via configuration
-                var url = $"http://www.omdbapi.com/?i={imdbId}&apikey={omdbApiKey}";
-                
-                var response = await _httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return null;
-
-                var json = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(json);
-                if (doc.RootElement.TryGetProperty("imdbRating", out var rating))
-                {
-                    return rating.GetString();
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"OMDb Rating Error: {ex.Message}");
                 return null;
             }
         }

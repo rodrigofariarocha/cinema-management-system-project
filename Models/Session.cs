@@ -26,7 +26,6 @@ namespace CinemaRocha.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
 
-        // Navigation properties
         public Movie? Movie { get; set; }
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     }

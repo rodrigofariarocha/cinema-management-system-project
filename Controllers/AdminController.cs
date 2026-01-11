@@ -11,7 +11,7 @@ using QuestPDF.Infrastructure;
 
 namespace CinemaRocha.Controllers
 {
-    [Authorize] // In a real app, this should be [Authorize(Roles = "Admin")]
+    [Authorize]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -27,7 +27,6 @@ namespace CinemaRocha.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Dashboard Stats
             var stats = new DashboardViewModel
             {
                 TotalMovies = await _context.Movies.CountAsync(),
@@ -35,7 +34,6 @@ namespace CinemaRocha.Controllers
                 TotalReservations = await _context.Reservations.CountAsync(),
                 TotalRevenue = await _context.Reservations.SumAsync(r => r.TotalPrice),
                 
-                // Recent items (last 5)
                 RecentReservations = await _context.Reservations
                     .Include(r => r.User)
                     .Include(r => r.Session)
@@ -70,7 +68,6 @@ namespace CinemaRocha.Controllers
         {
             QuestPDF.Settings.License = LicenseType.Community;
 
-            // Get all reservations with related data
             var reservations = await _context.Reservations
                 .Include(r => r.User)
                 .Include(r => r.Session)
@@ -99,7 +96,6 @@ namespace CinemaRocha.Controllers
 
                     page.Content().PaddingTop(20).Column(col =>
                     {
-                        // Stats Summary
                         col.Item().PaddingBottom(20).Row(row =>
                         {
                             row.RelativeItem().Container()
@@ -137,7 +133,6 @@ namespace CinemaRocha.Controllers
                                 });
                         });
 
-                        // Table Header
                         col.Item().Container()
                             .Background("#1a1a1a")
                             .Padding(10)
@@ -151,7 +146,6 @@ namespace CinemaRocha.Controllers
                                 row.RelativeItem(1).AlignRight().Text("Preço").FontSize(10).Bold().FontColor("#ffffff");
                             });
 
-                        // Table Rows
                         foreach (var reservation in reservations)
                         {
                             col.Item().Container()
@@ -191,10 +185,6 @@ namespace CinemaRocha.Controllers
 
             return View(reservations);
         }
-
-
-        // Placeholder actions for now
-        // --- Movies Management ---
 
         public async Task<IActionResult> Movies()
         {
@@ -264,7 +254,6 @@ namespace CinemaRocha.Controllers
             return RedirectToAction(nameof(Movies));
         }
 
-        // TMDB API endpoints
         [HttpGet]
         public async Task<IActionResult> SearchTmdb(string query)
         {
@@ -314,13 +303,11 @@ namespace CinemaRocha.Controllers
                 {
                     try
                     {
-                        // First search for the movie to get TMDB ID
                         var searchResults = await _tmdbService.SearchMoviesAsync(movie.Title);
                         var tmdbMovie = searchResults.FirstOrDefault();
                         
                         if (tmdbMovie != null)
                         {
-                            // Then get the logo using the TMDB ID
                             var logoUrl = await _tmdbService.GetMovieLogoAsync(tmdbMovie.Id);
                             if (!string.IsNullOrEmpty(logoUrl))
                             {
@@ -331,7 +318,6 @@ namespace CinemaRocha.Controllers
                     }
                     catch
                     {
-                        // Skip this movie if there's an error
                         continue;
                     }
                 }
@@ -361,23 +347,33 @@ namespace CinemaRocha.Controllers
                 {
                     try
                     {
-                        // Search to get TMDB ID
+                        Console.WriteLine($"[PopulateRatings] Processing: {movie.Title}");
                         var searchResults = await _tmdbService.SearchMoviesAsync(movie.Title);
                         var tmdbMovie = searchResults.FirstOrDefault();
                         
                         if (tmdbMovie != null)
                         {
-                            // Get details (which now includes IMDb rating)
+                            Console.WriteLine($"[PopulateRatings] Found on TMDB: {tmdbMovie.Title} (ID: {tmdbMovie.Id})");
                             var details = await _tmdbService.GetMovieDetailsAsync(tmdbMovie.Id);
                             if (details != null && !string.IsNullOrEmpty(details.ImdbRating))
                             {
+                                Console.WriteLine($"[PopulateRatings] Found Rating: {details.ImdbRating}");
                                 movie.ImdbRating = details.ImdbRating;
                                 updated++;
                             }
+                            else
+                            {
+                                Console.WriteLine($"[PopulateRatings] No rating or details found for {movie.Title} (Imdb_id: {details?.Imdb_id ?? "null"})");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[PopulateRatings] Movie not found on TMDB: {movie.Title}");
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Console.WriteLine($"[PopulateRatings] Error for {movie.Title}: {ex.Message}");
                         continue;
                     }
                 }
@@ -394,9 +390,6 @@ namespace CinemaRocha.Controllers
                 return Json(new { success = false, error = ex.Message });
             }
         }
-
-
-        // --- Sessions Management ---
 
         public async Task<IActionResult> Sessions()
         {
@@ -475,7 +468,6 @@ namespace CinemaRocha.Controllers
                 
             if (session != null)
             {
-                // First, clear seat reservations
                 foreach (var reservation in session.Reservations)
                 {
                     foreach (var seat in reservation.Seats)
@@ -485,18 +477,14 @@ namespace CinemaRocha.Controllers
                 }
                 await _context.SaveChangesAsync();
                 
-                // Then remove reservations
                 _context.Reservations.RemoveRange(session.Reservations);
                 await _context.SaveChangesAsync();
                 
-                // Finally remove session
                 _context.Sessions.Remove(session);
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Sessions));
         }
-
-        // --- Rooms Management ---
 
         public async Task<IActionResult> Rooms()
         {
@@ -514,7 +502,6 @@ namespace CinemaRocha.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Auto-generate seats based on capacity (simple logic: 10 seats per row)
                 int rows = (int)Math.Ceiling((double)room.Capacity / 10);
                 var seats = new List<Seat>();
                 
@@ -555,12 +542,6 @@ namespace CinemaRocha.Controllers
             {
                 try
                 {
-                    // For now, we only update the name. Updating capacity would require seat regeneration logic.
-                    // To keep it simple and safe, we'll fetch the existing room and only update the name if capacity changed, or warn user.
-                    // Actually, let's just update the properties. If capacity changes, we might have a mismatch with seats.
-                    // Ideally we should disable capacity editing or handle seat regeneration.
-                    // Let's stick to simple update for now, assuming admin knows what they are doing or we disable capacity edit in view.
-                    
                     _context.Update(room);
                     await _context.SaveChangesAsync();
                 }
@@ -600,8 +581,6 @@ namespace CinemaRocha.Controllers
         {
             return _context.Rooms.Any(e => e.Id == id);
         }
-
-        // --- Coupons Management ---
 
         public async Task<IActionResult> Coupons()
         {
@@ -694,8 +673,6 @@ namespace CinemaRocha.Controllers
             return _context.Coupons.Any(e => e.Id == id);
         }
 
-        // --- AI Session Generation ---
-
         [HttpPost]
         public async Task<IActionResult> GenerateSessionsWithAI([FromBody] AISessionRequest request)
         {
@@ -765,7 +742,6 @@ namespace CinemaRocha.Controllers
                         {
                             if (existing.Reservations != null && existing.Reservations.Any())
                             {
-                                // Don't delete sessions with active reservations
                                 errors++;
                                 continue;
                             }

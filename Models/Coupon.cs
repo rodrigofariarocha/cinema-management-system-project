@@ -28,7 +28,7 @@ public class Coupon
     [Required]
     public DateTime ValidTo { get; set; }
     
-    public int? MaxUses { get; set; } // null = unlimited
+    public int? MaxUses { get; set; }
     
     public int CurrentUses { get; set; } = 0;
     
@@ -41,6 +41,5 @@ public class Coupon
     [StringLength(500)]
     public string? Description { get; set; }
     
-    // Navigation
     public ICollection<UserCoupon> UserCoupons { get; set; } = new List<UserCoupon>();
 }

@@ -11,12 +11,10 @@ namespace CinemaRocha.Data
             using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
-                // Ensure database is created
                 context.Database.EnsureCreated();
 
                 var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
-                // 1. Create Admin User
                 var adminEmail = "admin@rochacinema.com";
                 var adminUser = await userManager.FindByEmailAsync(adminEmail);
                 if (adminUser == null)
@@ -30,7 +28,6 @@ namespace CinemaRocha.Data
                     await userManager.CreateAsync(adminUser, "Admin123!");
                 }
 
-                // 2. Seed Movies if empty
                 if (!context.Movies.Any())
                 {
                     context.Movies.AddRange(
@@ -93,10 +90,8 @@ namespace CinemaRocha.Data
                 await context.SaveChangesAsync();
                 }
 
-                // 3. Seed Rooms if empty
                 if (!context.Rooms.Any())
                 {
-                    // Room 1 - Small (4 rows, 12 seats per row = 48 seats)
                     var roomSmall = new Room 
                     { 
                         Name = "Sala 1 (Pequena)", 
@@ -105,7 +100,6 @@ namespace CinemaRocha.Data
                         Features = "Standard Sound, Comfortable Seats"
                     };
                     
-                    // Room 2 - Normal 1 (6 rows, 14 seats per row = 84 seats)
                     var roomNormal1 = new Room 
                     { 
                         Name = "Sala 2 (Normal)", 
@@ -114,7 +108,6 @@ namespace CinemaRocha.Data
                         Features = "Dolby Digital, Comfortable Seats"
                     };
                     
-                    // Room 3 - Normal 2 (8 rows, 16 seats per row = 128 seats)
                     var roomNormal2 = new Room 
                     { 
                         Name = "Sala 3 (Normal Plus)", 
@@ -123,7 +116,6 @@ namespace CinemaRocha.Data
                         Features = "Atmos Sound, Extra Legroom"
                     };
                     
-                    // Room 4 - Large IMAX (10 rows, 18 seats per row = 180 seats)
                     var roomLarge = new Room 
                     { 
                         Name = "Sala 4 (IMAX)", 
@@ -135,7 +127,6 @@ namespace CinemaRocha.Data
                     context.Rooms.AddRange(roomSmall, roomNormal1, roomNormal2, roomLarge);
                     await context.SaveChangesAsync();
 
-                    // Helper method to create seats for a room
                     void CreateSeatsForRoom(int roomId, int rows, int seatsPerRow, string[] rowLetters)
                     {
                         var seats = new List<Seat>();
@@ -154,22 +145,17 @@ namespace CinemaRocha.Data
                         context.Seats.AddRange(seats);
                     }
 
-                    // Small Room: 4 rows (A-D) x 12 seats = 48 seats
                     CreateSeatsForRoom(roomSmall.Id, 4, 12, new[] { "A", "B", "C", "D" });
                     
-                    // Normal 1 Room: 6 rows (A-F) x 14 seats = 84 seats
                     CreateSeatsForRoom(roomNormal1.Id, 6, 14, new[] { "A", "B", "C", "D", "E", "F" });
                     
-                    // Normal 2 Room: 8 rows (A-H) x 16 seats = 128 seats
                     CreateSeatsForRoom(roomNormal2.Id, 8, 16, new[] { "A", "B", "C", "D", "E", "F", "G", "H" });
                     
-                    // Large IMAX Room: 10 rows (A-J) x 18 seats = 180 seats
                     CreateSeatsForRoom(roomLarge.Id, 10, 18, new[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" });
 
                     await context.SaveChangesAsync();
                 }
 
-                // 4. Seed Sessions if empty - with safety checks
                 if (!context.Sessions.Any())
                 {
                     var movies = await context.Movies.ToListAsync();
@@ -180,15 +166,12 @@ namespace CinemaRocha.Data
                         var today = DateTime.Today;
                         var sessions = new List<Session>();
 
-                        // Sessions for next 7 days
                         for (int i = 0; i < 7; i++)
                         {
                             var date = today.AddDays(i);
                             
-                            // Only add sessions if we have enough movies and rooms
                             if (movies.Count > 0 && rooms.Count > 0)
                             {
-                                // Movie 1 in Room 1
                                 sessions.Add(new Session { MovieId = movies[0].Id, RoomId = rooms[0].Id, StartTime = date.AddHours(14).AddMinutes(30), Price = 12.50m });
                                 sessions.Add(new Session { MovieId = movies[0].Id, RoomId = rooms[0].Id, StartTime = date.AddHours(18).AddMinutes(00), Price = 12.50m });
                                 sessions.Add(new Session { MovieId = movies[0].Id, RoomId = rooms[0].Id, StartTime = date.AddHours(21).AddMinutes(30), Price = 12.50m });
@@ -196,14 +179,12 @@ namespace CinemaRocha.Data
                             
                             if (movies.Count > 1 && rooms.Count > 1)
                             {
-                                // Movie 2 in Room 2
                                 sessions.Add(new Session { MovieId = movies[1].Id, RoomId = rooms[1].Id, StartTime = date.AddHours(15).AddMinutes(00), Price = 8.50m });
                                 sessions.Add(new Session { MovieId = movies[1].Id, RoomId = rooms[1].Id, StartTime = date.AddHours(19).AddMinutes(00), Price = 8.50m });
                             }
                             
                             if (movies.Count > 2 && rooms.Count > 1)
                             {
-                                // Movie 3 in Room 2
                                 sessions.Add(new Session { MovieId = movies[2].Id, RoomId = rooms[1].Id, StartTime = date.AddHours(17).AddMinutes(00), Price = 8.50m });
                                 sessions.Add(new Session { MovieId = movies[2].Id, RoomId = rooms[1].Id, StartTime = date.AddHours(21).AddMinutes(00), Price = 8.50m });
                             }

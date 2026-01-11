@@ -42,15 +42,12 @@ namespace CinemaRocha.Areas.Identity.Pages.Account
 
             Email = email;
             
-            // For development, display the confirmation link
             if (user.EmailConfirmed)
             {
-                // Account already confirmed, redirect to login
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
 
-            // Only display the link in development mode
-            DisplayConfirmAccountLink = true; // You can make this configurable based on environment
+            DisplayConfirmAccountLink = true;
             if (DisplayConfirmAccountLink)
             {
                 var userId = await _userManager.GetUserIdAsync(user);

@@ -20,7 +20,6 @@ namespace CinemaRocha.Services
 
         public async Task<GeminiSessionResponse> GenerateSessionsAsync(string userPrompt)
         {
-            // Get available movies and rooms for context
             var movies = await _context.Movies.Select(m => new { m.Id, m.Title }).ToListAsync();
             var rooms = await _context.Rooms.Select(r => new { r.Id, r.Name }).ToListAsync();
             var sessions = await _context.Sessions
@@ -106,7 +105,6 @@ REGRAS:
 
             if (!response.IsSuccessStatusCode)
             {
-                // Log the actual error for debugging
                 Console.WriteLine($"Gemini API Error (HTTP {response.StatusCode}): {responseText}");
                 return new GeminiSessionResponse
                 {
@@ -125,7 +123,6 @@ REGRAS:
                     .GetProperty("text")
                     .GetString();
 
-                // Clean up the response (remove markdown code blocks if present)
                 if (textContent != null)
                 {
                     int firstBrace = textContent.IndexOf('{');
@@ -174,8 +171,8 @@ REGRAS:
 
     public class GeneratedSession
     {
-        public string Action { get; set; } = "CREATE"; // CREATE, EDIT, DELETE
-        public int? Id { get; set; } // For EDIT and DELETE
+        public string Action { get; set; } = "CREATE";
+        public int? Id { get; set; }
         public int MovieId { get; set; }
         public string MovieTitle { get; set; } = "";
         public int RoomId { get; set; }

@@ -11,14 +11,12 @@ public class ApplicationDbContext : IdentityDbContext
     {
     }
 
-    // DbSet properties for the core entities
     public DbSet<Movie> Movies { get; set; }
     public DbSet<Session> Sessions { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Seat> Seats { get; set; }
     
-    // Loyalty and Coupon system
     public DbSet<UserLoyalty> UserLoyalties { get; set; }
     public DbSet<Coupon> Coupons { get; set; }
     public DbSet<UserCoupon> UserCoupons { get; set; }
@@ -27,7 +25,6 @@ public class ApplicationDbContext : IdentityDbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configure Movie entity
         modelBuilder.Entity<Movie>(entity =>
         {
             entity.HasMany(m => m.Sessions)
@@ -36,7 +33,6 @@ public class ApplicationDbContext : IdentityDbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Configure Session entity
         modelBuilder.Entity<Session>(entity =>
         {
             entity.HasMany(s => s.Reservations)
@@ -45,7 +41,6 @@ public class ApplicationDbContext : IdentityDbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Configure Reservation entity
         modelBuilder.Entity<Reservation>(entity =>
         {
             entity.HasOne(r => r.User)
@@ -54,7 +49,6 @@ public class ApplicationDbContext : IdentityDbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
         
-        // Configure Loyalty System
         modelBuilder.Entity<UserLoyalty>(entity =>
         {
             entity.HasOne(ul => ul.User)

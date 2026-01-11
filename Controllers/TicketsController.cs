@@ -22,7 +22,6 @@ namespace CinemaRocha.Controllers
             _context = context;
         }
 
-        // GET: Tickets/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -40,7 +39,6 @@ namespace CinemaRocha.Controllers
             return View(movie);
         }
 
-        // GET: Tickets/SelectSeats/5
         [Authorize]
         public async Task<IActionResult> SelectSeats(int? id)
         {
@@ -59,7 +57,6 @@ namespace CinemaRocha.Controllers
             return View(session);
         }
 
-        // POST: Tickets/Book
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
@@ -78,7 +75,6 @@ namespace CinemaRocha.Controllers
             
             var seats = await _context.Seats.Where(s => seatIds.Contains(s.Id)).ToListAsync();
 
-            // Calculate price (check for coupon)
             decimal totalPrice = seats.Count * session.Price;
             UserCoupon? appliedCoupon = null;
             
@@ -95,7 +91,6 @@ namespace CinemaRocha.Controllers
                 
                 if (appliedCoupon != null && appliedCoupon.Coupon.Type == CouponType.FreeTicket)
                 {
-                    // 1 seat is free, pay for the rest
                     totalPrice = Math.Max(0, (seats.Count - 1) * session.Price);
                 }
             }
@@ -111,13 +106,11 @@ namespace CinemaRocha.Controllers
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
 
-            // Now update each seat's ReservationId
             foreach (var seat in seats)
             {
                 seat.ReservationId = reservation.Id;
             }
             
-            // Mark coupon as used
             if (appliedCoupon != null)
             {
                 appliedCoupon.IsUsed = true;
@@ -127,7 +120,6 @@ namespace CinemaRocha.Controllers
             
             await _context.SaveChangesAsync();
 
-            // ===== ADD LOYALTY POINTS (only if not using coupon) =====
             if (appliedCoupon == null)
             {
                 await AddLoyaltyPoints(userId, seats.Count);
@@ -136,7 +128,6 @@ namespace CinemaRocha.Controllers
             return RedirectToAction(nameof(Confirmation), new { id = reservation.Id });
         }
         
-        // POST: Tickets/ValidateCoupon (AJAX)
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> ValidateCoupon([FromBody] CouponValidationRequest request)
@@ -169,7 +160,6 @@ namespace CinemaRocha.Controllers
             return Json(new { success = false, message = "Tipo de cupão não suportado" });
         }
         
-        // POST: Loyalty/GenerateCode (AJAX) - Generates a random code for a coupon
         [HttpPost]
         [Authorize]
         [Route("/Loyalty/GenerateCode")]
@@ -186,7 +176,6 @@ namespace CinemaRocha.Controllers
                 return Json(new { success = false, message = "Cupão não encontrado" });
             }
             
-            // Generate a new random numeric code if not already generated
             if (userCoupon.Coupon.Code == "PENDING" || userCoupon.Coupon.Code.StartsWith("PENDING"))
             {
                 var newCode = GenerateNumericCode();
@@ -199,7 +188,6 @@ namespace CinemaRocha.Controllers
 
         private async Task AddLoyaltyPoints(string userId, int ticketCount)
         {
-            // Get or create user loyalty
             var loyalty = await _context.UserLoyalties.FirstOrDefaultAsync(ul => ul.UserId == userId);
             
             if (loyalty == null)
@@ -208,18 +196,14 @@ namespace CinemaRocha.Controllers
                 _context.UserLoyalties.Add(loyalty);
             }
 
-            // Add points (1 per ticket)
             loyalty.AvailablePoints += ticketCount;
             loyalty.TotalPoints += ticketCount;
             loyalty.LastUpdated = DateTime.Now;
 
-            // Check if user earned a free ticket (every 10 points)
             while (loyalty.AvailablePoints >= 10)
             {
-                // Deduct 10 points
                 loyalty.AvailablePoints -= 10;
 
-                // Create a NEW coupon with PENDING code (generated on demand)
                 var pendingId = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
                 var coupon = new Coupon
                 {
@@ -236,7 +220,6 @@ namespace CinemaRocha.Controllers
                 _context.Coupons.Add(coupon);
                 await _context.SaveChangesAsync();
 
-                // Issue coupon to user
                 var userCoupon = new UserCoupon
                 {
                     UserId = userId,
@@ -250,7 +233,6 @@ namespace CinemaRocha.Controllers
             await _context.SaveChangesAsync();
         }
 
-        // GET: Tickets/Confirmation/5
         [Authorize]
         public async Task<IActionResult> Confirmation(int? id)
         {
@@ -270,7 +252,6 @@ namespace CinemaRocha.Controllers
             return View(reservation);
         }
 
-        // GET: Tickets/MyTickets
         [Authorize]
         public async Task<IActionResult> MyTickets()
         {
@@ -287,7 +268,7 @@ namespace CinemaRocha.Controllers
 
             return View(reservations);
         }
-        // GET: Tickets/DownloadTicket/5
+
         [Authorize]
         public async Task<IActionResult> DownloadTicket(int? id)
         {
@@ -317,7 +298,6 @@ namespace CinemaRocha.Controllers
             var seats = string.Join(", ", reservation.Seats.Select(s => $"{s.Row}{s.Number}"));
             var qrCodeUrl = $"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=ROCHA-{reservation.Id}";
 
-            // Fetch Images
             byte[] posterImage = null;
             byte[] qrImage = null;
 
@@ -332,7 +312,6 @@ namespace CinemaRocha.Controllers
                 }
                 catch
                 {
-                    // Fallback
                 }
             }
 
@@ -342,15 +321,12 @@ namespace CinemaRocha.Controllers
                 {
                     page.Size(PageSizes.A5.Landscape());
                     page.Margin(0);
-                    page.PageColor("#0a0a0a"); // Fixed: BackgroundColor -> PageColor
+                    page.PageColor("#0a0a0a");
 
                     page.Content().Row(row =>
                     {
-                        // Left: Poster
-                        // Fixed: Removed invalid Height/Unit.Percentage, just let it fill height of row and fit area
                         row.ConstantItem(250).Image(posterImage).FitArea();
 
-                        // Right: Info
                         row.RelativeItem().Padding(30).Column(col =>
                         {
                             col.Item().Text(movie.Title).FontSize(28).Bold().FontColor("#ffffff").LineHeight(1.1f);
@@ -364,7 +340,6 @@ namespace CinemaRocha.Controllers
 
                             col.Item().PaddingTop(20).Container().Background("#ff3b30").PaddingVertical(5).PaddingHorizontal(15).CornerRadius(5).Text(session.Room.Name).SemiBold().FontColor("#ffffff");
 
-                            // Fixed: Replaced deprecated Grid with Row containing Columns
                             col.Item().PaddingTop(30).Row(stats => 
                             {
                                 stats.RelativeItem().Column(c => {
@@ -383,7 +358,6 @@ namespace CinemaRocha.Controllers
                                 });
                             });
 
-                            // Fixed: Applied PaddingBottom to the item container, not the Text descriptor
                             col.Item().PaddingTop(20).Column(c => {
                                 c.Item().PaddingBottom(5).Text("LUGARES RESERVADOS").FontSize(10).FontColor("#666666").SemiBold();
                                 c.Item().Row(r => {

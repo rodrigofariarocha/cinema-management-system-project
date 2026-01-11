@@ -17,7 +17,6 @@ namespace CinemaRocha.Models
         [ForeignKey("RoomId")]
         public Room? Room { get; set; }
 
-        // Link to reservation
         public int? ReservationId { get; set; }
         [ForeignKey("ReservationId")]
         public Reservation? Reservation { get; set; }

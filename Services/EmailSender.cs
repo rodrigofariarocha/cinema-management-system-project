@@ -62,7 +62,6 @@ namespace CinemaRocha.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send email via SMTP to {Email}", email);
-                // Fallback to file
                 await SaveToFileAsync(email, subject, htmlMessage);
             }
         }

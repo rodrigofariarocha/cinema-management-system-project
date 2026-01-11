@@ -23,7 +23,6 @@ public class UserCoupon
     
     public string? QRCodeData { get; set; }
     
-    // Navigation
     public IdentityUser User { get; set; } = null!;
     public Coupon Coupon { get; set; } = null!;
     public Reservation? Reservation { get; set; }
