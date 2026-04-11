@@ -1,5 +1,5 @@
-﻿# 🎬 CinemaRocha
-
+﻿# 🎬 RochaCinema 
+ 
 > A modern, full-featured cinema management and ticket booking web application built with **ASP.NET Core 9 MVC**.
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
