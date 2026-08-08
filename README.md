@@ -1,140 +1,137 @@
-﻿# 🎬 RochaCinema 
- 
-> A modern, full-featured cinema management and ticket booking web application built with **ASP.NET Core 9 MVC**.
+# 🎬 RochaCinema
+
+> Plataforma web completa de gestão de cinema e reserva de bilhetes, desenvolvida com **ASP.NET Core 9 MVC**.
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-MVC-512BD4?logo=dotnet)](https://learn.microsoft.com/en-us/aspnet/core/)
 [![Entity Framework](https://img.shields.io/badge/Entity_Framework-9.0-purple)](https://learn.microsoft.com/en-us/ef/core/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## 📋 Table of Contents
+## 📋 Índice
 
-- [About](#-about)
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
-- [Configuration](#-configuration)
-- [Database Setup](#-database-setup)
-- [Usage](#-usage)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Sobre o Projeto](#-sobre-o-projeto)
+- [Funcionalidades](#-funcionalidades)
+- [Stack Tecnológica](#-stack-tecnológica)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Como Começar](#-como-começar)
+- [Configuração](#-configuração)
+- [Base de Dados](#-base-de-dados)
+- [Utilização](#-utilização)
 
 ---
 
-## 📖 About
+## 📖 Sobre o Projeto
 
-**CinemaRocha** is a web platform designed to manage and streamline the full cinema experience — from movie scheduling and seat reservation to loyalty rewards and ticket generation. It integrates with external APIs (TMDB & Gemini AI) to enrich the movie catalog and deliver an intelligent user experience.
+**RochaCinema** é uma plataforma web desenvolvida para gerir toda a experiência de cinema — desde o agendamento de sessões e reserva de lugares até à emissão de bilhetes e um programa de fidelização. Integra APIs externas (TMDB & Gemini AI) para enriquecer o catálogo de filmes e oferecer uma experiência inteligente ao utilizador.
 
-This project was developed as a final academic project for the **Redes de Computadores** course at **Escola Digital**.
+Desenvolvido como projeto final da disciplina de **Redes de Computadores** na **Escola Profissional de Tecnologia Digital**.
 
 ---
 
-## ✨ Features
+## ✨ Funcionalidades
 
-| Feature | Description |
+| Funcionalidade | Descrição |
 |---|---|
-| 🎟️ **Ticket Booking** | Browse sessions, choose seats, and complete reservations in real time |
-| 🖨️ **PDF Ticket Generation** | Downloadable tickets generated with QuestPDF |
-| 📲 **QR Code Tickets** | Each ticket includes a scannable QR code for entry validation |
-| 🏆 **Loyalty Program** | Reward system with points, coupons and discount management |
-| 🎬 **Movie Catalog** | Enriched movie data (poster, backdrop, trailer, rating) via TMDB API |
-| 🤖 **AI Integration** | Gemini AI powering intelligent movie recommendations and chat |
-| 🔐 **Authentication** | Secure registration, login, and account management via ASP.NET Identity |
-| 🛠️ **Admin Dashboard** | Full backoffice for managing movies, rooms, sessions, seats, and coupons |
-| 📧 **Email Notifications** | Transactional emails for reservations and account actions |
+| 🎟️ **Reserva de Bilhetes** | Consulta de sessões, escolha de lugares e conclusão de reservas em tempo real |
+| 🖨️ **Geração de Bilhetes em PDF** | Bilhetes descarregáveis gerados com QuestPDF |
+| 📲 **Bilhetes com QR Code** | Cada bilhete inclui um QR Code para validação na entrada |
+| 🏆 **Programa de Fidelização** | Sistema de pontos, cupões e gestão de descontos |
+| 🎬 **Catálogo de Filmes** | Dados enriquecidos (poster, trailer, rating) via TMDB API |
+| 🤖 **Integração com IA** | Gemini AI para recomendações inteligentes de filmes e chat |
+| 🔐 **Autenticação** | Registo, login e gestão de conta via ASP.NET Identity |
+| 🛠️ **Painel de Administração** | Backoffice completo para filmes, salas, sessões, lugares e cupões |
+| 📧 **Notificações por Email** | Emails transacionais para reservas e ações de conta |
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Stack Tecnológica
 
 **Backend**
 - [ASP.NET Core 9 MVC](https://learn.microsoft.com/en-us/aspnet/core/mvc/)
-- [Entity Framework Core 9](https://learn.microsoft.com/en-us/ef/core/) with SQL Server
-- [ASP.NET Core Identity](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity) — authentication & authorization
+- [Entity Framework Core 9](https://learn.microsoft.com/en-us/ef/core/) com SQL Server
+- [ASP.NET Core Identity](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity) — autenticação e autorização
 
 **Frontend**
 - Razor Views + Razor Pages
 - Bootstrap (via ASP.NET Core static assets)
 
-**Integrations & Libraries**
-- [TMDB API](https://developer.themoviedb.org/) — movie metadata
-- [Google Gemini API](https://ai.google.dev/) — AI-powered features
-- [QuestPDF](https://www.questpdf.com/) — PDF ticket generation
-- [QRCoder](https://github.com/codebude/QRCoder) — QR code generation
+**Integrações e Bibliotecas**
+- [TMDB API](https://developer.themoviedb.org/) — metadados de filmes
+- [Google Gemini API](https://ai.google.dev/) — funcionalidades com IA
+- [QuestPDF](https://www.questpdf.com/) — geração de bilhetes em PDF
+- [QRCoder](https://github.com/codebude/QRCoder) — geração de QR Codes
 
 ---
 
-## 📁 Project Structure
+## 📁 Estrutura do Projeto
 
 ```
 CinemaRocha/
 ├── Areas/
-│   └── Identity/           # ASP.NET Identity Razor Pages (login, register, etc.)
+│   └── Identity/               # ASP.NET Identity Razor Pages (login, registo, etc.)
 ├── Controllers/
-│   ├── AdminController.cs  # Backoffice: movies, rooms, sessions, seats, coupons
-│   ├── TicketsController.cs # Booking flow, PDF & QR ticket generation
-│   ├── LoyaltyController.cs # Loyalty points and coupon management
-│   └── HomeController.cs   # Landing page and navigation
+│   ├── AdminController.cs      # Backoffice: filmes, salas, sessões, lugares, cupões
+│   ├── TicketsController.cs    # Fluxo de reserva, geração de PDF e QR Code
+│   ├── LoyaltyController.cs    # Pontos de fidelização e gestão de cupões
+│   └── HomeController.cs       # Página inicial e navegação
 ├── Data/
 │   └── ApplicationDbContext.cs
-├── Migrations/             # EF Core database migrations
-├── Models/                 # Domain entities (Movie, Session, Room, Seat, Reservation, Coupon…)
+├── Migrations/                 # Migrações da base de dados (EF Core)
+├── Models/                     # Entidades do domínio (Filme, Sessão, Sala, Lugar, Reserva, Cupão…)
 ├── Services/
-│   ├── TmdbService.cs      # TMDB API integration
-│   ├── GeminiService.cs    # Google Gemini AI integration
-│   └── EmailSender.cs      # Email notification service
-├── Views/                  # Razor view templates
-├── wwwroot/                # Static assets (CSS, JS, images)
-├── Program.cs              # App configuration and service registration
-└── appsettings.json        # App settings (connection strings, API keys)
+│   ├── TmdbService.cs          # Integração com a TMDB API
+│   ├── GeminiService.cs        # Integração com o Google Gemini AI
+│   └── EmailSender.cs          # Serviço de notificações por email
+├── Views/                      # Templates Razor
+├── wwwroot/                    # Assets estáticos (CSS, JS, imagens)
+├── Program.cs                  # Configuração da app e registo de serviços
+└── appsettings.json            # Configurações (connection strings, API keys)
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Como Começar
 
-### Prerequisites
+### Pré-requisitos
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-- [SQL Server](https://www.microsoft.com/en-us/sql-server/) (or SQL Server Express / LocalDB)
-- A [TMDB API key](https://developer.themoviedb.org/docs/getting-started)
-- A [Google Gemini API key](https://aistudio.google.com/app/apikey)
+- [SQL Server](https://www.microsoft.com/en-us/sql-server/) (ou SQL Server Express / LocalDB)
+- Uma [chave de API TMDB](https://developer.themoviedb.org/docs/getting-started)
+- Uma [chave de API Google Gemini](https://aistudio.google.com/app/apikey)
 
-### Installation
+### Instalação
 
-1. **Clone the repository**
+1. **Clonar o repositório**
    ```bash
    git clone https://github.com/rodrigofariarocha/Projeto-Cinema.git
    cd Projeto-Cinema
    ```
 
-2. **Restore dependencies**
+2. **Restaurar dependências**
    ```bash
    dotnet restore
    ```
 
-3. **Configure the app** *(see [Configuration](#-configuration) below)*
+3. **Configurar a aplicação** *(ver [Configuração](#-configuração) abaixo)*
 
-4. **Apply database migrations**
+4. **Aplicar as migrações da base de dados**
    ```bash
    dotnet ef database update
    ```
 
-5. **Run the application**
+5. **Executar a aplicação**
    ```bash
    dotnet run
    ```
 
-6. Open your browser at `https://localhost:5001` (or the port shown in the terminal).
+6. Abre o browser em `https://localhost:5001` (ou na porta indicada no terminal).
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ Configuração
 
-Edit `appsettings.json` (or use [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) for local development):
+Edita o ficheiro `appsettings.json` (ou usa [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) em desenvolvimento local):
 
 ```json
 {
@@ -142,77 +139,57 @@ Edit `appsettings.json` (or use [User Secrets](https://learn.microsoft.com/en-us
     "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=CinemaRocha;Trusted_Connection=True;"
   },
   "Tmdb": {
-    "ApiKey": "YOUR_TMDB_API_KEY"
+    "ApiKey": "A_TUA_TMDB_API_KEY"
   },
   "Gemini": {
-    "ApiKey": "YOUR_GEMINI_API_KEY"
+    "ApiKey": "A_TUA_GEMINI_API_KEY"
   },
   "Email": {
     "SmtpHost": "smtp.example.com",
     "SmtpPort": 587,
     "SenderEmail": "noreply@cinemarocha.com",
-    "SenderPassword": "YOUR_EMAIL_PASSWORD"
+    "SenderPassword": "A_TUA_PASSWORD"
   }
 }
 ```
 
-> **Tip:** Never commit real API keys or passwords. Use environment variables or .NET User Secrets in development.
+> ⚠️ **Nunca** faças commit de API keys ou passwords reais. Usa variáveis de ambiente ou .NET User Secrets em desenvolvimento.
 
 ---
 
-## 🗄️ Database Setup
+## 🗄️ Base de Dados
 
-This project uses **Entity Framework Core** with **SQL Server**. Migrations are already included.
+O projeto usa **Entity Framework Core** com **SQL Server**. As migrações já estão incluídas.
 
 ```bash
-# Apply all migrations and create the database
+# Aplicar todas as migrações e criar a base de dados
 dotnet ef database update
 ```
 
-The app automatically seeds initial data (admin user, sample rooms, etc.) on first run via `SeedData.Initialize`.
+A aplicação faz seed automático de dados iniciais (utilizador admin, salas de exemplo, etc.) na primeira execução via `SeedData.Initialize`.
 
 ---
 
-## 🧑‍💻 Usage
+## 🧑‍💻 Utilização
 
-### As a User
-- Register an account and log in
-- Browse the movie catalog and session schedule
-- Select your seats and complete your booking
-- Download your PDF ticket with QR code
-- Accumulate loyalty points and redeem coupons
+### Como Utilizador
+- Regista uma conta e faz login
+- Navega pelo catálogo de filmes e consulta as sessões disponíveis
+- Escolhe os teus lugares e conclui a reserva
+- Descarrega o bilhete em PDF com QR Code
+- Acumula pontos de fidelização e usa cupões de desconto
 
-### As an Admin
-- Access the **Admin Dashboard** at `/Admin`
-- Manage movies (manual entry or auto-fetch from TMDB)
-- Create and manage rooms, sessions, and seat maps
-- Issue or revoke coupons
-- View and manage all reservations
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! To contribute:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m "feat: add your feature"`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Open a Pull Request
-
-Please follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+### Como Administrador
+- Acede ao **Painel de Administração** em `/Admin`
+- Gere filmes (entrada manual ou via TMDB)
+- Cria e gere salas, sessões e mapas de lugares
+- Emite ou revoga cupões
+- Consulta e gere todas as reservas
 
 ---
 
 <div align="center">
 
-Made by [Rodrigo Faria Rocha](https://github.com/rodrigofariarocha) 
+Desenvolvido por [Rodrigo Faria Rocha](https://github.com/rodrigofariarocha)
 
 </div>
