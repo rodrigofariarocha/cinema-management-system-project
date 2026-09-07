@@ -1,0 +1,123 @@
+@model RochaCinema.Models.Movie
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="py-4">
+    <div class="grid grid-cols-1" style="grid-template-columns: 1fr 2fr; gap: 3rem;">
+        <div>
+            @if (!string.IsNullOrEmpty(Model.PosterUrl))
+            {
+                <img src="@Model.PosterUrl" alt="@Model.Title" style="width: 100%; border-radius: var(--radius); aspect-ratio: 2/3; object-fit: cover;" />
+            }
+            else
+            {
+                <div style="width: 100%; aspect-ratio: 2/3; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--card)) 100%); border-radius: var(--radius);">
+                    <span style="font-size: 5rem;">🎬</span>
+                </div>
+            }
+        </div>
+        
+        <div>
+            <h1 class="mb-3">@Model.Title</h1>
+            
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                <span class="badge badge-primary">@Model.Genre</span>
+                <span class="badge badge-secondary">@Model.DurationMinutes minutos</span>
+                @if (Model.Rating.HasValue)
+                {
+                    <span class="badge badge-success">⭐ @Model.Rating.Value.ToString("F1")/10</span>
+                }
+            </div>
+            
+            <div class="mb-4">
+                <h4 style="color: hsl(var(--muted-foreground)); font-size: 0.875rem; text-transform: uppercase; margin-bottom: 0.5rem;">Sinopse</h4>
+                <p style="line-height: 1.8;">@Model.Description</p>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.Director))
+            {
+                <div class="mb-4">
+                    <h4 style="color: hsl(var(--muted-foreground)); font-size: 0.875rem; text-transform: uppercase; margin-bottom: 0.5rem;">Realizador</h4>
+                    <p>@Model.Director</p>
+                </div>
+            }
+            
+            <div class="mb-4">
+                <h4 style="color: hsl(var(--muted-foreground)); font-size: 0.875rem; text-transform: uppercase; margin-bottom: 0.5rem;">Data de Lançamento</h4>
+                <p>@Model.ReleaseDate.ToString("dd/MM/yyyy")</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-5">
+        <h2 class="mb-4">Sessões Disponíveis</h2>
+        
+        @if (Model.Screenings != null && Model.Screenings.Any())
+        {
+            <div class="grid grid-cols-1">
+                @foreach (var screening in Model.Screenings.OrderBy(s => s.DateTime))
+                {
+                    <div class="card">
+                        <div class="card-body" style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem;">
+                            <div>
+                                <h4 style="margin-bottom: 0.5rem;">@screening.Theater.Name</h4>
+                                <p class="text-muted" style="margin-bottom: 0.25rem;">
+                                    📅 @screening.DateTime.ToString("dddd, dd/MM/yyyy") às @screening.DateTime.ToString("HH:mm")
+                                </p>
+                                <p class="text-muted" style="margin: 0;">
+                                    💺 @screening.AvailableSeats lugares disponíveis
+                                </p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p style="font-size: 1.5rem; font-weight: 700; color: hsl(var(--primary)); margin-bottom: 0.5rem;">
+                                    @screening.Price.ToString("C2")
+                                </p>
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    @if (screening.AvailableSeats > 0)
+                                    {
+                                        <a asp-controller="Tickets" asp-action="Purchase" asp-route-id="@screening.Id" class="btn btn-primary">
+                                            Comprar Bilhete
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-secondary" disabled>Esgotado</button>
+                                    }
+                                }
+                                else
+                                {
+                                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Entrar para Comprar</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <p style="margin: 0;">Não há sessões disponíveis para este filme no momento.</p>
+            </div>
+        }
+    </div>
+    
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">
+            ← Voltar aos Filmes
+        </a>
+    </div>
+</div>
+
+@section Styles {
+<style>
+    @@media (max-width: 768px) {
+        .grid[style*="grid-template-columns: 1fr 2fr"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+}

@@ -1,0 +1,93 @@
+@model IEnumerable<RochaCinema.Models.Ticket>
+
+@{
+    ViewData["Title"] = "Meus Bilhetes";
+}
+
+<div class="py-4">
+    <h1 class="mb-4">Meus Bilhetes</h1>
+    
+    @if (Model != null && Model.Any())
+    {
+        <div class="grid grid-cols-1 gap-3">
+            @foreach (var ticket in Model)
+            {
+                <div class="card @(ticket.Status == "Cancelado" ? "opacity-50" : "")">
+                    <div class="card-body" style="padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                                    <h3 style="margin: 0;">@ticket.Screening.Movie.Title</h3>
+                                    @if (ticket.Status == "Ativo")
+                                    {
+                                        <span class="badge badge-success">Ativo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Cancelado</span>
+                                    }
+                                </div>
+                                
+                                <div class="grid grid-cols-4 gap-3">
+                                    <div>
+                                        <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Sala</p>
+                                        <p style="font-weight: 600;">@ticket.Screening.Theater.Name</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Lugar</p>
+                                        <p style="font-weight: 600;">@ticket.SeatNumber</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Data e Hora</p>
+                                        <p style="font-weight: 600;">@ticket.Screening.DateTime.ToString("dd/MM/yyyy HH:mm")</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Preço</p>
+                                        <p style="font-weight: 600; color: hsl(var(--primary));">@ticket.PricePaid.ToString("C2")</p>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-muted mt-3" style="font-size: 0.875rem;">
+                                    Bilhete #@ticket.Id.ToString("D6") | Comprado em @ticket.PurchaseDate.ToString("dd/MM/yyyy HH:mm")
+                                </p>
+                            </div>
+                            
+                            @if (ticket.Status == "Ativo" && ticket.Screening.DateTime > DateTime.Now)
+                            {
+                                <div>
+                                    <form asp-action="Cancel" method="post" onsubmit="return confirm('Tem a certeza que deseja cancelar este bilhete?');" style="display: inline;">
+                                        <input type="hidden" name="id" value="@ticket.Id" />
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            Cancelar Bilhete
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p style="margin: 0;">Ainda não tem bilhetes comprados.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">
+                Explorar Filmes
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    .opacity-50 {
+        opacity: 0.5;
+    }
+    
+    @@media (max-width: 768px) {
+        .grid-cols-4 {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+</style>

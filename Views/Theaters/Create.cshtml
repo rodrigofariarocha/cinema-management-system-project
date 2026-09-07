@@ -1,0 +1,38 @@
+@model RochaCinema.Models.Theater
+
+@{
+    ViewData["Title"] = "Adicionar Sala";
+}
+
+<div class="py-4">
+    <h1 class="mb-4">Adicionar Sala</h1>
+    
+    <div class="card" style="max-width: 600px;">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                
+                <div class="form-group">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" placeholder="Ex: Sala 1, Sala VIP" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Capacity" class="form-label"></label>
+                    <input asp-for="Capacity" class="form-control" type="number" min="1" placeholder="Ex: 100" />
+                    <span asp-validation-for="Capacity" class="text-danger"></span>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Criar Sala</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

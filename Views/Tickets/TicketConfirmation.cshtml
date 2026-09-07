@@ -1,0 +1,59 @@
+@model RochaCinema.Models.Ticket
+
+@{
+    ViewData["Title"] = "Bilhete Confirmado";
+}
+
+<div class="py-5">
+    <div style="max-width: 700px; margin: 0 auto; text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+        <h1 class="mb-3">Bilhete Comprado com Sucesso!</h1>
+        <p class="text-muted mb-5" style="font-size: 1.125rem;">
+            O seu bilhete foi confirmado. Apresente este ecrã na entrada ou aceda a "Meus Bilhetes".
+        </p>
+    </div>
+    
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div class="ticket">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 0.5rem;">@Model.Screening.Movie.Title</h2>
+                <p class="text-muted">Bilhete #@Model.Id.ToString("D6")</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.875rem; text-transform: uppercase;">Sala</p>
+                    <p style="font-weight: 600; font-size: 1.125rem;">@Model.Screening.Theater.Name</p>
+                </div>
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.875rem; text-transform: uppercase;">Lugar</p>
+                    <p style="font-weight: 600; font-size: 1.125rem;">@Model.SeatNumber</p>
+                </div>
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.875rem; text-transform: uppercase;">Data e Hora</p>
+                    <p style="font-weight: 600;">@Model.Screening.DateTime.ToString("dd/MM/yyyy")</p>
+                    <p style="font-weight: 600; color: hsl(var(--primary));">@Model.Screening.DateTime.ToString("HH:mm")</p>
+                </div>
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.875rem; text-transform: uppercase;">Preço Pago</p>
+                    <p style="font-weight: 700; color: hsl(var(--primary)); font-size: 1.5rem;">@Model.PricePaid.ToString("C2")</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid hsl(var(--border));">
+                <p class="text-muted" style="font-size: 0.875rem;">
+                    Data de Compra: @Model.PurchaseDate.ToString("dd/MM/yyyy HH:mm")
+                </p>
+            </div>
+        </div>
+        
+        <div class="mt-4" style="display: flex; gap: 1rem; justify-content: center;">
+            <a asp-action="MyTickets" class="btn btn-primary">
+                Ver Meus Bilhetes
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                Voltar aos Filmes
+            </a>
+        </div>
+    </div>
+</div>

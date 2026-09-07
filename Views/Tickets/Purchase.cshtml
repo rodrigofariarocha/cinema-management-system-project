@@ -1,0 +1,75 @@
+@model RochaCinema.Models.Screening
+
+@{
+    ViewData["Title"] = "Comprar Bilhete";
+}
+
+<div class="py-4">
+    <h1 class="mb-4">Comprar Bilhete</h1>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title">@Model.Movie.Title</h3>
+            <p class="card-text">@Model.Movie.Description</p>
+            
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Sala</p>
+                    <p style="font-weight: 600;">@Model.Theater.Name</p>
+                </div>
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Data e Hora</p>
+                    <p style="font-weight: 600;">@Model.DateTime.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Preço</p>
+                    <p style="font-weight: 600; color: hsl(var(--primary)); font-size: 1.25rem;">@Model.Price.ToString("C2")</p>
+                </div>
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Lugares Disponíveis</p>
+                    <p style="font-weight: 600;">@Model.AvailableSeats</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <h3 class="mb-4">Selecione o seu Lugar</h3>
+            
+            <form asp-action="ConfirmPurchase" asp-controller="Tickets" method="post">
+                <input type="hidden" name="screeningId" value="@Model.Id" />
+                
+                <div class="form-group">
+                    <label for="seatNumber" class="form-label">Número do Lugar</label>
+                    <input type="text" id="seatNumber" name="seatNumber" class="form-control" 
+                           placeholder="Ex: A1, B5, C10" required 
+                           pattern="[A-Z][0-9]{1,2}" 
+                           title="Formato: Letra maiúscula seguida de 1 ou 2 dígitos (ex: A1, B12)" />
+                    <small class="form-text">
+                        Digite a letra da fila (A-Z) seguida do número do assento (1-@Model.Theater.Capacity). Exemplo: A1, B5, C10
+                    </small>
+                </div>
+                
+                <div class="mt-4" style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary">
+                        Confirmar Compra - @Model.Price.ToString("C2")
+                    </button>
+                    <a asp-controller="Home" asp-action="MovieDetails" asp-route-id="@Model.MovieId" class="btn btn-secondary">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <div class="alert alert-info">
+            <strong>Nota:</strong> Esta é uma compra de demonstração. Não será efetuado nenhum pagamento real.
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

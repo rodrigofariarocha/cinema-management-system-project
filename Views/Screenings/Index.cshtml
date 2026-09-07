@@ -1,0 +1,55 @@
+@model IEnumerable<RochaCinema.Models.Screening>
+
+@{
+    ViewData["Title"] = "Gestão de Sessões";
+}
+
+<div class="py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gestão de Sessões</h1>
+        <a asp-action="Create" class="btn btn-primary">+ Adicionar Sessão</a>
+    </div>
+    
+    @if (Model != null && Model.Any())
+    {
+        <div class="card">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Filme</th>
+                        <th>Sala</th>
+                        <th>Data e Hora</th>
+                        <th>Preço</th>
+                        <th>Lugares Disponíveis</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var screening in Model)
+                    {
+                        <tr>
+                            <td style="font-weight: 600;">@screening.Movie.Title</td>
+                            <td>@screening.Theater.Name</td>
+                            <td>@screening.DateTime.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td style="color: hsl(var(--primary)); font-weight: 600;">@screening.Price.ToString("C2")</td>
+                            <td>@screening.AvailableSeats</td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a asp-action="Details" asp-route-id="@screening.Id" class="btn btn-sm btn-secondary">Ver</a>
+                                    <a asp-action="Edit" asp-route-id="@screening.Id" class="btn btn-sm btn-primary">Editar</a>
+                                    <a asp-action="Delete" asp-route-id="@screening.Id" class="btn btn-sm btn-danger">Eliminar</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p style="margin: 0;">Nenhuma sessão registada. Clique em "Adicionar Sessão" para começar.</p>
+        </div>
+    }
+</div>

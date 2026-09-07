@@ -1,0 +1,69 @@
+@model IEnumerable<RochaCinema.Models.Ticket>
+
+@{
+    ViewData["Title"] = "Gestão de Bilhetes";
+}
+
+<div class="py-4">
+    <h1 class="mb-4">Gestão de Bilhetes</h1>
+    
+    @if (Model != null && Model.Any())
+    {
+        <div class="card">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Utilizador</th>
+                        <th>Filme</th>
+                        <th>Sala</th>
+                        <th>Sessão</th>
+                        <th>Lugar</th>
+                        <th>Preço</th>
+                        <th>Estado</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Model)
+                    {
+                        <tr>
+                            <td>#@ticket.Id.ToString("D6")</td>
+                            <td>@ticket.User.Email</td>
+                            <td style="font-weight: 600;">@ticket.Screening.Movie.Title</td>
+                            <td>@ticket.Screening.Theater.Name</td>
+                            <td>@ticket.Screening.DateTime.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><strong>@ticket.SeatNumber</strong></td>
+                            <td style="color: hsl(var(--primary));">@ticket.PricePaid.ToString("C2")</td>
+                            <td>
+                                @if (ticket.Status == "Ativo")
+                                {
+                                    <span class="badge badge-success">Ativo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">Cancelado</span>
+                                }
+                            </td>
+                            <td>
+                                @if (ticket.Status == "Ativo")
+                                {
+                                    <form asp-action="Cancel" method="post" onsubmit="return confirm('Cancelar este bilhete?');" style="display: inline;">
+                                        <input type="hidden" name="id" value="@ticket.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger">Cancelar</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p style="margin: 0;">Nenhum bilhete vendido ainda.</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,23 @@
+databases:
+  - name: rochacinema-db
+    databaseName: cinema_rocha
+    user: cinema
+    plan: free
+
+services:
+  - type: web
+    name: rochacinema
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rochacinema-db
+          property: connectionString
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      # Password do admin gerada pelo Render (ve-la em Environment no painel)
+      - key: ADMIN_PASSWORD
+        generateValue: true

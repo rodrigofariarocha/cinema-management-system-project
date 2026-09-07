@@ -1,0 +1,41 @@
+@model IEnumerable<RochaCinema.Models.Theater>
+
+@{
+    ViewData["Title"] = "Gestão de Salas";
+}
+
+<div class="py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gestão de Salas</h1>
+        <a asp-action="Create" class="btn btn-primary">+ Adicionar Sala</a>
+    </div>
+    
+    @if (Model != null && Model.Any())
+    {
+        <div class="grid grid-cols-3 gap-3">
+            @foreach (var theater in Model)
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">@theater.Name</h3>
+                        <p class="card-text">
+                            <span class="text-muted">Capacidade:</span> 
+                            <strong>@theater.Capacity lugares</strong>
+                        </p>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                            <a asp-action="Details" asp-route-id="@theater.Id" class="btn btn-sm btn-secondary">Ver</a>
+                            <a asp-action="Edit" asp-route-id="@theater.Id" class="btn btn-sm btn-primary">Editar</a>
+                            <a asp-action="Delete" asp-route-id="@theater.Id" class="btn btn-sm btn-danger">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p style="margin: 0;">Nenhuma sala registada. Clique em "Adicionar Sala" para começar.</p>
+        </div>
+    }
+</div>

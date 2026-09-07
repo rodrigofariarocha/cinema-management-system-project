@@ -1,0 +1,51 @@
+@model RochaCinema.Models.Movie
+
+@{
+    ViewData["Title"] = "Eliminar Filme";
+}
+
+<div class="py-4">
+    <h1 class="mb-4">Eliminar Filme</h1>
+    
+    <div class="alert alert-danger">
+        <strong>Atenção!</strong> Tem a certeza que deseja eliminar este filme?
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <h3 class="card-title">@Model.Title</h3>
+            <p class="card-text">@Model.Description</p>
+            
+            <div class="grid grid-cols-3 gap-3 mt-4">
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Género</p>
+                    <p style="font-weight: 600;">@Model.Genre</p>
+                </div>
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Duração</p>
+                    <p style="font-weight: 600;">@Model.DurationMinutes minutos</p>
+                </div>
+                <div>
+                    <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Lançamento</p>
+                    <p style="font-weight: 600;">@Model.ReleaseDate.ToString("dd/MM/yyyy")</p>
+                </div>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.Director))
+            {
+                <div class="mt-3">
+                    <p class="text-muted" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Realizador</p>
+                    <p style="font-weight: 600;">@Model.Director</p>
+                </div>
+            }
+            
+            <form asp-action="Delete" method="post" style="margin-top: 2rem;">
+                <input type="hidden" asp-for="Id" />
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-danger">Confirmar Eliminação</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

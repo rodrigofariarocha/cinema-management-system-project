@@ -1,0 +1,22 @@
+## Build
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+
+## IDE
+.vs/
+.vscode/
+.idea/
+
+## Segredos locais (nunca commitar)
+appsettings.Production.json
+appsettings.Local.json
+*.pfx
+
+## Sistema
+Thumbs.db
+.DS_Store
+*.bak
