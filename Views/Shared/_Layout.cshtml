@@ -43,7 +43,7 @@
                         
                         <li>
                             <form asp-controller="Account" asp-action="Logout" method="post" style="display: inline;">
-                                <button type="submit" class="btn btn-sm btn-secondary">Sair (@User.Identity.Name)</button>
+                                <button type="submit" class="btn btn-sm btn-secondary" title="@User.Identity.Name">Sair (@(User.Identity.Name?.Split("@")[0]))</button>
                             </form>
                         </li>
                     }
