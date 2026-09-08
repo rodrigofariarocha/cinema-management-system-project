@@ -31,6 +31,11 @@ services:
         sync: false
       - key: Gemini__ApiKey
         sync: false
+      # Email: SmtpEnabled tem de estar a true para o envio acontecer
+      - key: EmailSettings__SmtpEnabled
+        value: "true"
+      - key: EmailSettings__FromEmail
+        sync: false
       - key: EmailSettings__SmtpUsername
         sync: false
       - key: EmailSettings__SmtpPassword
