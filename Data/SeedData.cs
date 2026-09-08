@@ -11,7 +11,8 @@ namespace CinemaRocha.Data
             using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
-                context.Database.EnsureCreated();
+                // Cria/atualiza o esquema da base de dados no arranque
+                context.Database.Migrate();
 
                 var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 

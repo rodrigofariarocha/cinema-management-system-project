@@ -8,8 +8,6 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using QRCoder;
-using System.Drawing;
-using System.Drawing.Imaging;
 
 namespace CinemaRocha.Controllers
 {
@@ -399,17 +397,10 @@ namespace CinemaRocha.Controllers
             using (var qrGenerator = new QRCodeGenerator())
             {
                 var qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.Q);
-                using (var qrCode = new QRCode(qrCodeData))
-                {
-                    using (var bitmap = qrCode.GetGraphic(20))
-                    {
-                        using (var stream = new MemoryStream())
-                        {
-                            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                            return Convert.ToBase64String(stream.ToArray());
-                        }
-                    }
-                }
+                // PngByteQRCode em vez de QRCode: nao depende do System.Drawing
+                // (GDI+), que so existe no Windows e rebentaria no container Linux
+                var qrCode = new PngByteQRCode(qrCodeData);
+                return Convert.ToBase64String(qrCode.GetGraphic(20));
             }
         }
         
