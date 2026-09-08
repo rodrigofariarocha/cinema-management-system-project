@@ -18,6 +18,9 @@ services:
           property: connectionString
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
+      # Password do admin gerada pelo Render (ve-la em Environment no painel)
+      - key: ADMIN_PASSWORD
+        generateValue: true
       # Chaves: preenche-as no painel do Render (Environment).
       # sync:false = o Render pede-tas e nunca as guarda no repositorio.
       - key: Tmdb__ApiKey

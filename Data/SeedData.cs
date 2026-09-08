@@ -26,7 +26,9 @@ namespace CinemaRocha.Data
                         Email = adminEmail,
                         EmailConfirmed = true
                     };
-                    await userManager.CreateAsync(adminUser, "Admin123!");
+                    // Em producao a password vem da variavel de ambiente ADMIN_PASSWORD
+                    var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD") ?? "Admin123!";
+                    await userManager.CreateAsync(adminUser, adminPassword);
                 }
 
                 if (!context.Movies.Any())
