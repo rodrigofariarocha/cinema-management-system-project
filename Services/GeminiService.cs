@@ -8,12 +8,16 @@ namespace CinemaRocha.Services
     public class GeminiService
     {
         private readonly string _apiKey;
+        private readonly string _model;
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _context;
 
         public GeminiService(IConfiguration configuration, ApplicationDbContext context)
         {
             _apiKey = configuration["Gemini:ApiKey"] ?? throw new Exception("Gemini API key not configured");
+            // Modelo configuravel: a Google retira modelos antigos de circulacao,
+            // e assim troca-se em Gemini__Model sem mexer no codigo
+            _model = configuration["Gemini:Model"] ?? "gemini-2.0-flash";
             _httpClient = new HttpClient();
             _context = context;
         }
@@ -96,13 +100,13 @@ REGRAS:
                 }
             };
 
-            var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={_apiKey}";
+            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
             // Nao registar o url: leva a chave de API no fim
             // Diagnostico sem expor a chave: so o tamanho e o fim
             var pista = string.IsNullOrEmpty(_apiKey)
                 ? "AUSENTE"
                 : $"{_apiKey.Length} caracteres, termina em ...{_apiKey[Math.Max(0, _apiKey.Length - 4)..]}";
-            Console.WriteLine($"Calling Gemini API: gemini-2.0-flash (chave: {pista})");
+            Console.WriteLine($"Calling Gemini API: {_model} (chave: {pista})");
             
             var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(url, content);
