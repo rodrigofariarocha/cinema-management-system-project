@@ -98,7 +98,11 @@ REGRAS:
 
             var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={_apiKey}";
             // Nao registar o url: leva a chave de API no fim
-            Console.WriteLine("Calling Gemini API: gemini-2.0-flash");
+            // Diagnostico sem expor a chave: so o tamanho e o fim
+            var pista = string.IsNullOrEmpty(_apiKey)
+                ? "AUSENTE"
+                : $"{_apiKey.Length} caracteres, termina em ...{_apiKey[Math.Max(0, _apiKey.Length - 4)..]}";
+            Console.WriteLine($"Calling Gemini API: gemini-2.0-flash (chave: {pista})");
             
             var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(url, content);
