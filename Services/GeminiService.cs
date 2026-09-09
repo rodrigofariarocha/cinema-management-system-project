@@ -17,7 +17,7 @@ namespace CinemaRocha.Services
             _apiKey = configuration["Gemini:ApiKey"] ?? throw new Exception("Gemini API key not configured");
             // Modelo configuravel: a Google retira modelos antigos de circulacao,
             // e assim troca-se em Gemini__Model sem mexer no codigo
-            _model = configuration["Gemini:Model"] ?? "gemini-2.0-flash";
+            _model = configuration["Gemini:Model"] ?? "gemini-2.5-flash";
             _httpClient = new HttpClient();
             _context = context;
         }

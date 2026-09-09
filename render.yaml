@@ -31,7 +31,7 @@ services:
         sync: false
       # Modelo do Gemini: troca-o aqui se a Google retirar o atual
       - key: Gemini__Model
-        value: gemini-2.0-flash
+        value: gemini-2.5-flash
       - key: Gemini__ApiKey
         sync: false
       # Email: SmtpEnabled tem de estar a true para o envio acontecer
